@@ -1,4 +1,4 @@
-# fde-mindset: a forward-deployed engagement pattern, with one worked example
+# fde-engagement-pattern: a forward-deployed engagement pattern, with one worked example
 
 **Forward Deployed Engineering (FDE)** is a consultative practice. A small group of engineers, either inside an organization or serving its clients, embeds with a business owner. Together they define the problem, prove a fix against numbers agreed in advance, and hand it over so it runs without them. The practice is older than AI engineering: it grew out of field engineering, solutions engineering and internal consulting groups. AI workloads raise the cost of building before measuring, but the discipline is the same.
 
