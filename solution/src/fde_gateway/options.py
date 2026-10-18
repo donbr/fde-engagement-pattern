@@ -144,13 +144,24 @@ def quota_scale(option: Option, seeds: range, mix: str, t_chat: float) -> float 
     return None
 
 
-def shadow_replay(arrivals: list[Arrival], reserves: dict[str, float]) -> dict:
+def shadow_replay(arrivals: list[Arrival], reserves: dict[str, float],
+                  callers: dict[str, str] = CALLERS, identities: dict[str, str] | None = None) -> dict:
     """Today's traffic with a shadow-mode gateway in front of today's shared provider limit (R15, R16).
 
     The provider decides as it does today (first come, first served). The gateway
     blocks nothing: it records what the policy would have done and, because it
     knows each caller's identity, attributes every provider failure to a workload.
     That attribution is what a shared provider key can't give.
+
+    Args:
+        callers: Workload -> the identity its traffic arrives with (the ground truth
+            the gateway does *not* see).
+        identities: Identity -> workload, as the gateway knows it. Defaults to the
+            inverse of ``callers``.
+
+    Every count is keyed by ``Decision.workload``, which comes from the caller's
+    identity, not by the arrival's true workload: the attribution shown is what
+    the gateway can actually see.
 
     Returns:
         provider: {workload: {"offered": n, "failed": m}}; gateway: Gateway.metrics();
@@ -160,7 +171,8 @@ def shadow_replay(arrivals: list[Arrival], reserves: dict[str, float]) -> dict:
     clock = lambda: now[0]  # noqa: E731
     policy = LoadShedder(ShedderConfig(TOKEN_CAPACITY, TOKEN_REFILL_PER_SEC, reserves), clock=clock)
     provider = LoadShedder(ShedderConfig(TOKEN_CAPACITY, TOKEN_REFILL_PER_SEC, ZERO), clock=clock)
-    gateway = Gateway({w: policy for w in WORKLOADS}, {c: w for w, c in CALLERS.items()}, enforce=False)
+    known = identities if identities is not None else {c: w for w, c in callers.items()}
+    gateway = Gateway({w: policy for w in WORKLOADS}, known, enforce=False)
     seen = {w: {"offered": 0, "failed": 0} for w in WORKLOADS}
 
     seq = itertools.count()
@@ -172,11 +184,11 @@ def shadow_replay(arrivals: list[Arrival], reserves: dict[str, float]) -> dict:
             gateway.settle(a.request_id, a.token_actual)
             provider.release(a.request_id, a.token_actual)
             continue
-        decision = gateway.submit(CALLERS[a.workload], a.request_id, a.token_estimate)
-        seen[a.workload]["offered"] += 1
+        decision = gateway.submit(callers[a.workload], a.request_id, a.token_estimate)
+        seen[decision.workload]["offered"] += 1
         if provider.admit(Request(a.request_id, decision.priority, a.token_estimate)):
             heapq.heappush(events, (now[0] + CALL_LATENCY_SEC, next(seq), "settle", a))
         else:
-            seen[a.workload]["failed"] += 1
+            seen[decision.workload]["failed"] += 1
             gateway.cancel(a.request_id)
     return {"provider": seen, "gateway": gateway.metrics(), "spend": gateway.showback()}

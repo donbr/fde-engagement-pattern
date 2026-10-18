@@ -132,7 +132,7 @@ def main() -> None:
         print(report(mix, ev, statuses) + "\n")
 
     if args.out:
-        args.out.write_text(json.dumps(results_json(evaluations, values, statuses), indent=2))
+        args.out.write_text(json.dumps(results_json(evaluations, values, statuses), indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

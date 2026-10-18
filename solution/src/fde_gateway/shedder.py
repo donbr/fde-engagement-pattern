@@ -102,6 +102,10 @@ class ShedderConfig:
         # A copy, so mutating the caller's dict (or a shared module constant) can't change a running policy.
         object.__setattr__(self, "reserves", MappingProxyType(dict(self.reserves)))
 
+    def __reduce__(self):
+        # MappingProxyType can't be pickled or deep-copied; rebuild from a plain dict instead.
+        return (ShedderConfig, (self.token_capacity, self.token_refill_per_sec, dict(self.reserves)))
+
 
 def _is_number(value: object) -> bool:
     return isinstance(value, int | float) and not isinstance(value, bool) and math.isfinite(value)
@@ -166,6 +170,7 @@ class LoadShedder:
             False if shed (balance unchanged).
 
         Raises:
+            TypeError: ``token_estimate`` isn't an int (a NaN or float would slip past the comparisons).
             ValueError: If the priority isn't configured, ``token_estimate <= 0``, or
                 ``request.id`` still has an open hold (reusing it would overwrite the
                 hold and lose its tokens). Raised before any state changes, so invalid
@@ -174,8 +179,7 @@ class LoadShedder:
         # Validate before touching state.
         if request.priority not in self.config.reserves:
             raise ValueError(f"unknown priority {request.priority!r}")
-        if request.token_estimate <= 0:
-            raise ValueError("token_estimate must be positive")
+        _check_token_estimate(request.token_estimate)
         if request.id in self.request_ledger:
             raise ValueError(f"request id {request.id!r} already has an open hold")
 
@@ -215,10 +219,11 @@ class LoadShedder:
             The value checks run first, so a bad value leaves the hold open.
         """
         _check_token_actual(token_actual)
-        token_estimate = self.request_ledger.pop(request_id)
+        token_estimate = self.request_ledger[request_id]
         self._refill()
         # Cap at capacity so a refund can't overfill; an overrun may go negative.
         self.token_balance = min(self.config.token_capacity, self.token_balance + token_estimate - token_actual)
+        del self.request_ledger[request_id]  # removed last, so nothing above can leave a half-settled hold
 
     def stats(self) -> dict[str, dict[str, int]]:
         """Return admitted/shed counts per priority.
@@ -227,6 +232,14 @@ class LoadShedder:
             A copy, so callers can't modify the shedder's counters.
         """
         return {priority: dict(tally) for priority, tally in self.priority_decision_counts.items()}
+
+
+def _check_token_estimate(token_estimate: object) -> None:
+    """Raise TypeError or ValueError unless ``token_estimate`` is an int > 0 (not a bool)."""
+    if isinstance(token_estimate, bool) or not isinstance(token_estimate, int):
+        raise TypeError(f"token_estimate must be an int, got {token_estimate!r}")
+    if token_estimate <= 0:
+        raise ValueError("token_estimate must be positive")
 
 
 def _check_token_actual(token_actual: object) -> None:

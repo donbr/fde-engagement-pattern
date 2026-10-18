@@ -13,7 +13,7 @@ During open enrollment, member-service agents lose their AI assistant at peak be
 The product is a **decision instrument** with two parts:
 
 1. **An options replay.** The same peak traffic runs through each fix in cost order. Each fix is scored against thresholds agreed in advance and gets a verdict at each gate.
-2. **A gateway that runs in shadow mode first.** It decides each call by **authenticated identity** (a claimed tier is ignored and flagged, an unknown caller is rejected). It **blocks nothing**, but it records:
+2. **A gateway that runs in shadow mode first.** It decides each call by **authenticated identity** (a claimed tier is ignored and flagged, an unknown caller is rejected). It **blocks no known caller**, but it records:
    - every provider failure, attributed to the workload that suffered it;
    - what the policy would have held back, and why;
    - spend on actual tokens by department;
@@ -66,14 +66,14 @@ Chat and claims shed / offered:
 - No retries.
 - The provider is approximated by a token bucket.
 - One replica.
-- Latency (p99 4 µs) was measured on a laptop.
+- Latency (p99 about 4–8 µs across runs) was measured on a laptop.
 
 ## 4. The cost
 
 | Path | Cost | What you get |
 | --- | --- | --- |
 | Option 1 | Days; one owner (Content Operations) | 18.3% → 5.8% in `baseline`; 41.4% → 32.3% in `waves` |
-| **Shadow gateway** | It sits in the call path, so it needs the architecture review and egress entry. It blocks nothing, so there's no enforcement risk. | The metrics above, on real traffic, by department |
+| **Shadow gateway** | It sits in the call path, so it needs the architecture review and egress entry. It blocks no known caller (unknown callers are rejected), so there's no enforcement risk. | The metrics above, on real traffic, by department |
 | Cheaper attribution: one provider key per workload | Days; platform team | Attributed failures and spend from provider reporting, *if* the provider breaks those out per key (check). **No** would-sheds and no estimate accuracy. |
 | Enforcement (3b) | Turn on a switch that's already deployed; Claims sheds 22% → 44% | Chat 5.8% → 2.6% (`baseline`) |
 | Quota | About 1.1× (`baseline`) or 1.9× (`waves`) of today | Meets the 5% target with option 1 |
@@ -93,7 +93,7 @@ Chat and claims shed / offered:
 | Risk | Status |
 | --- | --- |
 | Tier spoofing | Designed out: the tier comes from identity. 0 of 221 spoofing attempts were decided at CRITICAL. |
-| A gateway in the call path, even observe-only | Shadow mode never blocks. A failure in the gateway itself must fail open to today's path; the SRE lead confirms in the runbook. |
+| A gateway in the call path, even observe-only | Shadow mode never blocks a known caller. A failure in the gateway itself must fail open to today's path; the SRE lead confirms in the runbook. |
 | Choosing on simulated traffic | The two mixes disagree, so the shadow metrics on real traffic decide, not this simulation. |
 | Thresholds set by the engineer | All six are proposed, labelled in every verdict, and handed to named owners. |
 | The visibility value disappears if per-workload keys already exist | H9 is the week-1 question. If it's true, decide the gateway on enforcement alone. |
@@ -102,7 +102,7 @@ Chat and claims shed / offered:
 
 **Proceed with option 1 and the shadow gateway. Defer enforcement.**
 
-- The shadow gateway earns its place by producing metrics that don't exist today. It needs no enforcement decision and carries no blocking risk.
+- The shadow gateway earns its place by producing metrics that don't exist today. It needs no enforcement decision and blocks no known caller.
 - Enforcement waits for the real token shares and the two signed thresholds.
 - If the shadow metrics show chat's own bursts dominate, the answer is quota, enforcement never turns on, and the gateway stays as the measurement and showback layer.
 

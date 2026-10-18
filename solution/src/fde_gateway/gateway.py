@@ -9,7 +9,8 @@ Requirements it implements (use_case/requirements.md at the repo root):
     R10 showback on actual tokens for every call that ran, including shadow-allowed would-sheds.
     R15 per-workload metrics that don't exist today: calls, reasons, estimate accuracy.
     R16 ``cancel`` frees a call that failed downstream (e.g. a provider 429), so it costs
-        nothing and the failure stays attributed to its workload.
+        nothing. Attribution of that failure comes from the caller's identity: see
+        ``options.shadow_replay``, which counts it under ``Decision.workload``.
 
 In shadow mode the shedder still decides, and only its would-admits draw on its
 bucket. So the shadow records what the policy *would* have done with its own
@@ -29,7 +30,7 @@ from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from fde_gateway.shedder import LoadShedder, Request, _check_token_actual
+from fde_gateway.shedder import LoadShedder, Request, _check_token_actual, _check_token_estimate
 
 REASONS = ("admitted", "floor", "too_large")
 
@@ -97,6 +98,9 @@ class Gateway:
             raise ValueError(f"identities map to unknown workloads {sorted(unknown)}")
         if unserved := set(identities.values()) - set(shedders):
             raise ValueError(f"no shedder for workloads {sorted(unserved)}")
+        if untiered := sorted(w for w in set(identities.values())
+                              if workloads[w].priority not in shedders[w].config.reserves):
+            raise ValueError(f"no reserve for the tier of workloads {untiered}")
         _check_bool(enforce)
         self.shedders = dict(shedders)
         self.identities = dict(identities)
@@ -120,12 +124,16 @@ class Gateway:
         Raises:
             PermissionError: Unknown caller, in either mode. Nothing is recorded but
                 the rejection count.
-            ValueError: ``request_id`` is still running (reusing it would lose its
-                hold), or from the shedder, for a non-positive estimate.
+            TypeError: ``token_estimate`` isn't an int.
+            ValueError: ``token_estimate`` isn't positive, or ``request_id`` is still
+                running (reusing it would lose its hold).
+
+            Every check runs before anything is recorded, in both modes.
         """
         if caller not in self.identities:
             self.unknown_callers += 1
             raise PermissionError(f"unknown caller {caller!r}")
+        _check_token_estimate(token_estimate)
         if request_id in self.running:
             raise ValueError(f"request id {request_id!r} is already running")
         workload = self.workloads[self.identities[caller]]
@@ -166,9 +174,10 @@ class Gateway:
             The value checks run first, so a bad value leaves the call running.
         """
         _check_token_actual(token_actual)
-        workload_name, held, token_estimate = self.running.pop(request_id)
+        workload_name, held, token_estimate = self.running[request_id]
         if held:
             self.shedders[workload_name].release(request_id, token_actual)
+        del self.running[request_id]  # after the shedder settles, so a failure there leaves the call running
         self._spend[self.workloads[workload_name].department] += token_actual
         tally = self._by_workload[workload_name]
         tally["settled"] += 1
@@ -182,9 +191,10 @@ class Gateway:
         Raises:
             KeyError: The call isn't running.
         """
-        workload_name, held, _ = self.running.pop(request_id)
+        workload_name, held, _ = self.running[request_id]
         if held:
             self.shedders[workload_name].release(request_id, 0)
+        del self.running[request_id]
 
     def set_enforce(self, value: bool) -> None:
         """The kill switch. False returns to today's behaviour: every known caller's call runs.

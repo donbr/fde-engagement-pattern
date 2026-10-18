@@ -45,7 +45,7 @@ The client is hypothetical (a regional health insurer, an illustrative example).
 
 | Value | What it gives | When it earns its place | Risk |
 | --- | --- | --- | --- |
-| **1. Visibility (shadow mode)** | Metrics that **don't exist today**: provider failures attributed to the workload and department that suffered them; would-sheds by tier and reason; spend on actual tokens by department; estimate accuracy by workload. These make M1, M2 and M4 measurable on real traffic. | When today's data can't attribute: one shared provider key, no gateway in front (H9). Usually from day one. | Low. It never blocks; turning it off is today's behaviour. It's still in the call path, so it needs the architecture review. |
+| **1. Visibility (shadow mode)** | Metrics that **don't exist today**: provider failures attributed to the workload and department that suffered them; would-sheds by tier and reason; spend on actual tokens by department; estimate accuracy by workload. These make M1, M2 and M4 measurable on real traffic. | When today's data can't attribute: one shared provider key, no gateway in front (H9). Usually from day one. | Low. It never blocks a known caller (unknown callers are rejected); turning it off is today's behaviour. It's still in the call path, so it needs the architecture review. |
 | **2. Enforcement** | Lower tiers can't starve member chat | Only if G2 passes on the metrics value 1 produced | Higher: it changes who gets served |
 
 **Measurement comes before the decision it informs.** Option 1 and the shadow gateway run together. The shadow gateway shows whether option 1 worked, and whether enforcement is worth it.
@@ -170,7 +170,7 @@ Every SIM row comes from `evals/results/2026-10-18_heldout.md`, regenerated from
 1. **The two traffic mixes disagree, so the client's own logs decide.** If peaks are spill-over (`baseline`), the gateway is a trade-off between Member Services and Claims. If peaks are bursts (`waves`), the gateway barely helps (it removes at most 12% of what's left), and the fix is quota. **The next step is one query on the last open enrollment's logs (M2), not a build.**
 2. **The cheapest fix nearly suffices.** Option 1 alone leaves 5.8% against a 5% target. Option 1 plus about 10% more quota meets it with no gateway at all. If Member Services sets T_chat at 6% or higher, G1 stops the gateway program.
 3. **Separate limits per workload (option 2) are the worst option.** Splitting the pipe wastes idle capacity: chat fails 17.8% and Claims 67%. Drop it from the ladder unless real demand shows a very different split.
-4. **The gateway's value is narrower than the first pass claimed.** It removes at most 56% of what option 1 leaves, and only by costing Claims 22 points. The starter reserves remove 14%. The gateway enforces cheaply (p99 4 µs) and safely (0 spoofed admits), but whether it's *worth* enforcing is a business call.
+4. **The gateway's value is narrower than the first pass claimed.** It removes at most 56% of what option 1 leaves, and only by costing Claims 22 points. The starter reserves remove 14%. The gateway enforces cheaply (p99 under 10 µs across runs) and safely (0 spoofed admits), but whether it's *worth* enforcing is a business call.
 
 ### Amendment, step 8: the value results 1–4 missed
 

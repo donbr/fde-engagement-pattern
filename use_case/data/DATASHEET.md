@@ -7,7 +7,7 @@
 **Generated from:** the written description below. **No real records.**
 **Bucket:** the starter scenario's: 1,000 tokens, refilling at 100 tokens/s.
 **Window:** one 120-second open-enrollment morning peak per seed.
-**Held-out seeds:** 200–219, never run by `evaluate` before step 5. The step 4 tests did touch seeds 200–204 for invariant checks; see the correction in `../../PROCESS.md`. Tests now use seeds 300+. The first-pass spike used seeds 0–19 and 100–119.
+**Held-out seeds:** 200–219, never run by `evaluate` before step 5. The step 4 tests did touch seeds 200–204 for invariant checks; see the correction in `../../PROCESS.md`. The invariant tests now use seeds 300+; only the snapshot tests run 200–219, to pin the published results. The first-pass spike used seeds 0–19 and 100–119.
 
 **Description:** member chat and claims summaries arrive all morning. The nightly policy refresh has spilled over and floods the first minute. In the "waves" mix, member chats also surge for 10 seconds three times in the window, as members respond to an enrollment email.
 

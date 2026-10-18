@@ -10,7 +10,7 @@ Five cases, one per requirement that decides the design. The expected values wer
 | --- | --- | --- | --- |
 | `member_chat_survives_refresh_flood` | Member Services ops manager | R1 | Each lower tier stops at its floor; chat spends what's left |
 | `tier_comes_from_identity` | CISO | R5 | A claimed tier is ignored and flagged; an unknown caller is rejected (**the escalate case**) |
-| `shadow_mode_and_kill_switch` | SRE lead | R7 | Shadow mode never blocks; enforcement can be switched on and off mid-run |
+| `shadow_mode_and_kill_switch` | SRE lead | R7 | Shadow mode never blocks a known caller; enforcement can be switched on and off mid-run |
 | `showback_charges_what_ran` | FinOps lead | R10 | Spend is charged on actual tokens, including shadow-allowed would-sheds; blocked calls cost nothing |
 | `gate_stops_when_cheap_fix_suffices` | Sponsor | R12 | **The stop case**: the instrument recommends against building the gateway when option 1 meets the target |
 

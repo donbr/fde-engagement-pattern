@@ -30,6 +30,12 @@ class Verdict:
 
 
 KNOWN = frozenset(k for keys in NEEDS.values() for k in keys)
+# Allowed range per threshold, in the units the gate rules use: rates are fractions
+# (0.05, not 5), M4 is percentage points, M6 is milliseconds, M8 is a count.
+RANGES = {
+    "t_chat": (0.0, 1.0), "m2_min": (0.0, 1.0), "m3_min": (0.0, 1.0),
+    "m4_max_points": (0.0, 100.0), "m6_p99_ms_max": (0.0, math.inf), "m8_max": (0.0, math.inf),
+}
 
 
 def _no_duplicates(pairs: list[tuple[str, object]]) -> dict:
@@ -47,16 +53,24 @@ def load_thresholds(path: Path) -> tuple[dict[str, float], dict[str, str]]:
     ``m8_max: NaN`` makes the spoofing stop rule unable to fire.
 
     Raises:
-        ValueError: A duplicate or unknown key, a value that isn't a finite number,
-            or a status that isn't "proposed" or "signed".
+        ValueError: A duplicate or unknown key, an entry that isn't an object, a
+            value that isn't a finite number or is out of range for its units, or a
+            status that isn't "proposed" or "signed".
     """
     raw = json.loads(Path(path).read_text(), object_pairs_hook=_no_duplicates)
     for key, entry in raw.items():
         if key not in KNOWN:
             raise ValueError(f"unknown threshold {key!r}; expected some of {sorted(KNOWN)}")
+        if not isinstance(entry, dict):
+            raise ValueError(f"threshold {key!r} must be an object with value, owner, status and reason")
         value = entry.get("value")
         if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(value):
             raise ValueError(f"threshold {key!r} must be a finite number, got {value!r}")
+        low, high = RANGES[key]
+        if not low <= value <= high:
+            raise ValueError(f"threshold {key!r} = {value} is out of range [{low}, {high}] (check units)")
+        if key == "m8_max" and value != int(value):
+            raise ValueError(f"threshold 'm8_max' must be a whole number of calls, got {value}")
         if entry.get("status") not in STATUSES:
             raise ValueError(f"threshold {key!r} has status {entry.get('status')!r}; expected one of {STATUSES}")
     return {k: e["value"] for k, e in raw.items()}, {k: e["status"] for k, e in raw.items()}

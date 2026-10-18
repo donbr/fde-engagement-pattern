@@ -10,7 +10,7 @@
 | R4 | Content Operations owner | If the refresh moves off the live limit, it still completes. | Option 1 models the refresh on a separate batch lane; freshness is an open question for the owner |
 | R5 | CISO | The tier comes from the caller's authenticated identity. A tier claimed in the request is ignored and flagged. Unknown callers are rejected. | Golden `tier_comes_from_identity`; M8 |
 | R6 | Privacy officer | Decision records carry metadata only, never prompt or response content. | Test on the decision record's fields |
-| R7 | SRE lead | Shadow mode first: it never blocks, but records what it would have done. A kill switch returns to today's behaviour at runtime. | Golden `shadow_mode_and_kill_switch` |
+| R7 | SRE lead | Shadow mode first: it never blocks a known caller, but records what it would have done. (Unknown callers are rejected in both modes; `decisions.md`, step 10.) A kill switch returns to today's behaviour at runtime. | Golden `shadow_mode_and_kill_switch` |
 | R8 | SRE lead | Sheds are counted by tier **and reason**. | Test on the gateway's counts |
 | R9 | SRE lead | The added decision latency is negligible next to the model call. | M6 (p99), threshold `m6_p99_ms_max` |
 | R10 | FinOps lead | Spend is charged on **actual** tokens for every call that ran, including calls that shadow mode allowed but would have shed. Calls that never ran cost nothing. | Golden `showback_charges_what_ran` |
