@@ -44,7 +44,7 @@ class Workload:
     priority: str
 
 
-# The tier table the business owners sign (R1, R2).
+# The tier table the business owners sign (R1).
 WORKLOADS: dict[str, Workload] = {
     w.name: w
     for w in (

@@ -3,6 +3,7 @@
 Run (from solution/):
     uv run python -m fde_gateway.evaluate                 # held-out seeds 200-219, both mixes
     uv run python -m fde_gateway.evaluate --out results.json
+    uv run python -m fde_gateway.evaluate --thresholds signed.json   # the owners' signed values
 """
 
 import argparse
@@ -22,7 +23,7 @@ def _rate(t: dict) -> float:
 
 
 def evaluate_mix(mix: str, seeds: range, thresholds: dict[str, float]) -> dict:
-    """All options, M1-M8 and the gate verdicts for one mix."""
+    """All options, M1-M6 and M8 (M7, month-end showback, isn't simulated), and the gate verdicts for one mix (R12). M6 is the decision latency in R9."""
     results = {name: pooled(opt, seeds, mix) for name, opt in OPTIONS.items()}
     chat = {name: r["member_chat"] for name, r in results.items()}
     claims_rate = {name: _rate(r["claims_summary"]) for name, r in results.items() if "claims_summary" in r}

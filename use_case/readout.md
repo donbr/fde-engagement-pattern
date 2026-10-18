@@ -32,7 +32,7 @@ The product is a **decision instrument** with two parts:
 | | Today, one shared key | Shadow gateway, `baseline` (spill-over) | Shadow gateway, `waves` (chat bursts) |
 | --- | --- | --- | --- |
 | Failures by workload | 1,226 failures (`baseline`), **not attributed** | chat 113/618, claims 99/221, refresh 1,014/1,162 | chat 501/1,209, claims 133/221, refresh 1,029/1,162 |
-| Peak tokens by department | **none** | Member Services 49%, Content Ops 30%, Claims 21% | Member Services 62%, Content Ops 25%, Claims 14% |
+| Share of tokens consumed in the peak window, by department | **none** | Member Services 49%, Content Ops 30%, Claims 21% | Member Services 62%, Content Ops 25%, Claims 14% |
 | Actual ÷ estimate | **none** | chat 0.87, claims 0.90, refresh 0.86 | chat 0.88, claims 0.90, refresh 0.86 |
 
 **The token share is the diagnosis.** When back office takes about half the peak (`baseline`), moving the refresh is the lever. When member chat takes 62% (`waves`), the lever is quota. Actual usage comes in 10–14% under the estimate (estimates run 11–16% high), so every hold reserves capacity that's never used.

@@ -7,7 +7,7 @@ This replaces the story from an earlier solution-first spike (not included in th
 2. Lay out the options in cost order.
 3. Write down what would prove the gateway useful, and what would kill it, **before** any data comes in.
 
-The client is hypothetical (a regional health insurer, an illustrative example). The only numbers here come from an earlier solution-first spike on synthetic traffic (not included in this repo). They're labelled that way, and they don't stand in for a baseline.
+The client is hypothetical (a regional health insurer, an illustrative example). Two sets of numbers appear here, both from synthetic traffic: §2 shows what an earlier solution-first spike suggested (not included in this repo), and §8 records this pass's held-out results. Both are labelled, and neither stands in for a real baseline.
 
 > **The trust principle.** Stopping the gateway, or the wider roadmap, is a legitimate outcome, and I tell the sponsor that in the first meeting. A CxO who hears the kill criteria on day one believes the "proceed" recommendation on day sixty.
 
@@ -34,7 +34,7 @@ The client is hypothetical (a regional health insurer, an illustrative example).
 | # | Option | Cost and time | What it fixes | What it can't fix |
 | :---: | --- | --- | --- | --- |
 | 0 | Do nothing | None | Nothing | Failures in the same weeks every year |
-| 1 | **Move the nightly refresh off the live limit**: reschedule it, or send it to the provider's batch lane | Days; a config or scheduler change; batch pricing may lower cost (check current pricing in Anthropic's docs) | The spill-over flood, if that's the main cause | Claims and chat competing with each other; chat's own bursts; showback |
+| 1 | **Move the nightly refresh off the live limit**: reschedule it, or send it to the provider's batch lane | Days; a config or scheduler change; batch pricing may lower cost (check your provider's current pricing) | The spill-over flood, if that's the main cause | Claims and chat competing with each other; chat's own bursts; showback |
 | 2 | **Separate limits per workload**: separate provider workspaces or keys with their own limits (confirm what the provider supports) | Days to weeks; an account and key change | Hard isolation between departments, and showback by key | Idle capacity can't be borrowed; it splits the pipe instead of prioritizing it |
 | 3 | **Tiered gateway**: per-tier reserves, fail closed on unknown callers, showback on actual tokens | Weeks; a security review and an egress entry | Lower tiers can never starve member chat, and CRITICAL can still borrow everything | Chat's own bursts; anything beyond the account's total limit |
 | 4 | **Buy more quota** | Fast; recurring cost | Everything, at a price | Nothing technical, but the amount is a guess unless options 1–3 measure it first |
@@ -163,7 +163,7 @@ This is the lesson to apply early: hear the people with inconvenient information
 | G0 | 2026-10-18 **SIM, waves** | M1, M2 | as above | M1 501/1209 = 41.4%; **M2 37%** | **NARROW: size quota** (option 1 needs ~1.9×) | — |
 | G3 | — | M1, M7, M8 | — | Not reachable in simulation | — | — |
 
-Every SIM row comes from `evals/results/2026-10-18_heldout.md`, regenerated from code in steps 9 and 10 with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`).
+Every SIM row comes from `evals/results/2026-10-18_heldout.md`, regenerated from code in steps 9 and 10 with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`). M6 is wall-clock timing on a laptop and varies between runs (4–8 µs since step 5); the 4 µs above is what step 5 measured.
 
 ### What the first results changed
 
@@ -179,11 +179,11 @@ Results 1–4 judged the gateway only as an enforcer. That missed its first valu
 | What the sponsor can see | Today, shared key | Shadow gateway, `baseline` | Shadow gateway, `waves` |
 | --- | --- | --- | --- |
 | Failures by workload | 1,226 failures (`baseline`), not attributed | chat 113/618, claims 99/221, refresh 1,014/1,162 | chat 501/1,209, claims 133/221, refresh 1,029/1,162 |
-| Peak token share by department | none | Member Services 49%, **Content Ops 30%**, Claims 21% | **Member Services 62%**, Content Ops 25%, Claims 14% |
+| Share of tokens consumed in the peak window, by department | none | Member Services 49%, **Content Ops 30%**, Claims 21% | **Member Services 62%**, Content Ops 25%, Claims 14% |
 | Estimate accuracy (actual ÷ estimate) | none | chat 0.87, claims 0.90, refresh 0.86 | similar |
 | Would-sheds by tier and reason | none | yes, per call | yes, per call |
 
-**The spend share is what tells the two kinds of peak apart.** When the refresh takes 30% of peak tokens, moving it is the lever. When member chat itself takes 62%, the lever is quota. Actual usage comes in 10–14% under the estimate (estimates run 11–16% high), which is capacity held as padding on every call. **So the gateway earns its place first as the measurement instrument (M9), before any enforcement decision.** The step 5 gate verdicts above are unchanged; they're about enforcement.
+**The share of consumed tokens is what tells the two kinds of peak apart.** When the refresh takes 30% of tokens consumed in the peak window, moving it is the lever. When member chat itself takes 62%, the lever is quota. Actual usage comes in 10–14% under the estimate (estimates run 11–16% high), which is capacity held as padding on every call. **So the gateway earns its place first as the measurement instrument (M9), before any enforcement decision.** The step 5 gate verdicts above are unchanged; they're about enforcement.
 
 ---
 

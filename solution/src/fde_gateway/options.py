@@ -37,7 +37,7 @@ class Option:
 
     Attributes:
         reserves: Floors per tier, as in ShedderConfig.
-        off_live: Workloads moved to the batch lane, off the live limit.
+        off_live: Workloads moved to the batch lane, off the live limit (option 1, R4).
         dropped: Workloads left out of the run entirely (only for chat_alone).
         partitions: Workload -> (capacity, refill per sec) for separate limits;
             None means one shared limit.
@@ -79,7 +79,7 @@ def replay(arrivals: list[Arrival], option: Option, scale: float = 1.0, spoof: b
         scale: Multiplier on capacity and refill (quota sizing, M5).
         spoof: Every claims call also claims ``member_chat`` (M8).
         timings_ms: If given, each submit's wall time is appended (M6). Kept out of
-            the return value so replays stay deterministic.
+            the return value so replays stay deterministic (R13).
 
     Returns:
         offered, shed and batch_lane per workload; spend per department; counts by
@@ -136,7 +136,7 @@ def pooled(option: Option, seeds: range, mix: str, scale: float = 1.0) -> dict[s
 
 
 def quota_scale(option: Option, seeds: range, mix: str, t_chat: float) -> float | None:
-    """Smallest quota multiplier (1.0-2.0 in steps of 0.1) at which pooled M1 <= t_chat; None if none does."""
+    """Smallest quota multiplier (1.0-2.0 in steps of 0.1) at which pooled M1 <= t_chat; None if none does (R11)."""
     for scale in QUOTA_SCALES:
         chat = pooled(option, seeds, mix, scale)["member_chat"]
         if chat["shed"] / chat["offered"] <= t_chat:
