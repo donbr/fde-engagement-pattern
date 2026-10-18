@@ -1,0 +1,24 @@
+# Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Ad-hoc evaluate output (`evaluate --out results.json`); committed results live in use_case/evals/results/
+solution/results.json
+
+# Secrets: never commit real keys, only .env.example with placeholders
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
