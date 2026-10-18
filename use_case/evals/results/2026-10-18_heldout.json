@@ -1,0 +1,236 @@
+{
+  "baseline": {
+    "metrics": {
+      "m1_today": 0.18284789644012944,
+      "m2_backoffice_share": 0.9469026548672567,
+      "m1_option1": 0.05825242718446602,
+      "candidates": {
+        "option2": {
+          "m3": -2.0555555555555554,
+          "m4_points": 45.248868778280546
+        },
+        "option3a": {
+          "m3": 0.1388888888888889,
+          "m4_points": 3.6199095022624475
+        },
+        "option3b": {
+          "m3": 0.5555555555555556,
+          "m4_points": 22.171945701357465
+        }
+      },
+      "m5_chat_alone": 0.009708737864077669,
+      "m6_p99_ms": 0.004237839220877504,
+      "m8_spoof_admits": 0,
+      "m8_spoof_attempts": 221
+    },
+    "recommended": "option1",
+    "quota_scale": {
+      "option1": 1.1
+    },
+    "gates": {
+      "G0": {
+        "verdict": "PROCEED",
+        "reason": "failures 18.3% > t_chat; back office causes 95%"
+      },
+      "G1": {
+        "verdict": "PROCEED",
+        "reason": "option 1 leaves chat failures at 5.8% > t_chat 5%"
+      },
+      "G2": {
+        "verdict": "NARROW",
+        "reason": "benefit is real but Claims pays more than its limit (option3b: M3 56%, M4 +22.2 pts): the Claims owner decides"
+      }
+    },
+    "results": {
+      "today": {
+        "member_chat": {
+          "shed": 113,
+          "offered": 618,
+          "worst": 0.3333333333333333
+        },
+        "claims_summary": {
+          "shed": 99,
+          "offered": 221,
+          "worst": 0.6363636363636364
+        },
+        "policy_refresh": {
+          "shed": 1014,
+          "offered": 1162,
+          "worst": 0.9523809523809523
+        }
+      },
+      "option1": {
+        "member_chat": {
+          "shed": 36,
+          "offered": 618,
+          "worst": 0.2682926829268293
+        },
+        "claims_summary": {
+          "shed": 49,
+          "offered": 221,
+          "worst": 0.4444444444444444
+        }
+      },
+      "option2": {
+        "member_chat": {
+          "shed": 110,
+          "offered": 618,
+          "worst": 0.3103448275862069
+        },
+        "claims_summary": {
+          "shed": 149,
+          "offered": 221,
+          "worst": 0.875
+        }
+      },
+      "option3a": {
+        "member_chat": {
+          "shed": 31,
+          "offered": 618,
+          "worst": 0.1951219512195122
+        },
+        "claims_summary": {
+          "shed": 57,
+          "offered": 221,
+          "worst": 0.5
+        }
+      },
+      "option3b": {
+        "member_chat": {
+          "shed": 16,
+          "offered": 618,
+          "worst": 0.0975609756097561
+        },
+        "claims_summary": {
+          "shed": 98,
+          "offered": 221,
+          "worst": 0.6666666666666666
+        }
+      },
+      "chat_alone": {
+        "member_chat": {
+          "shed": 6,
+          "offered": 618,
+          "worst": 0.05714285714285714
+        }
+      }
+    }
+  },
+  "waves": {
+    "metrics": {
+      "m1_today": 0.4143920595533499,
+      "m2_backoffice_share": 0.36926147704590817,
+      "m1_option1": 0.3225806451612903,
+      "candidates": {
+        "option2": {
+          "m3": -0.5333333333333333,
+          "m4_points": 23.529411764705888
+        },
+        "option3a": {
+          "m3": 0.023076923076923078,
+          "m4_points": 4.072398190045251
+        },
+        "option3b": {
+          "m3": 0.12307692307692308,
+          "m4_points": 23.076923076923073
+        }
+      },
+      "m5_chat_alone": 0.261373035566584,
+      "m6_p99_ms": 0.007552509941888275,
+      "m8_spoof_admits": 0,
+      "m8_spoof_attempts": 221
+    },
+    "recommended": "option1",
+    "quota_scale": {
+      "option1": 1.9
+    },
+    "gates": {
+      "G0": {
+        "verdict": "NARROW",
+        "reason": "back office causes only 37% of failures: size quota instead"
+      },
+      "G1": {
+        "verdict": "NOT REACHED",
+        "reason": "an earlier gate did not proceed"
+      },
+      "G2": {
+        "verdict": "NOT REACHED",
+        "reason": "an earlier gate did not proceed"
+      }
+    },
+    "results": {
+      "today": {
+        "member_chat": {
+          "shed": 501,
+          "offered": 1209,
+          "worst": 0.49333333333333335
+        },
+        "claims_summary": {
+          "shed": 133,
+          "offered": 221,
+          "worst": 0.8181818181818182
+        },
+        "policy_refresh": {
+          "shed": 1029,
+          "offered": 1162,
+          "worst": 0.9552238805970149
+        }
+      },
+      "option1": {
+        "member_chat": {
+          "shed": 390,
+          "offered": 1209,
+          "worst": 0.4533333333333333
+        },
+        "claims_summary": {
+          "shed": 97,
+          "offered": 221,
+          "worst": 0.6111111111111112
+        }
+      },
+      "option2": {
+        "member_chat": {
+          "shed": 598,
+          "offered": 1209,
+          "worst": 0.5866666666666667
+        },
+        "claims_summary": {
+          "shed": 149,
+          "offered": 221,
+          "worst": 0.875
+        }
+      },
+      "option3a": {
+        "member_chat": {
+          "shed": 381,
+          "offered": 1209,
+          "worst": 0.4533333333333333
+        },
+        "claims_summary": {
+          "shed": 106,
+          "offered": 221,
+          "worst": 0.6666666666666666
+        }
+      },
+      "option3b": {
+        "member_chat": {
+          "shed": 342,
+          "offered": 1209,
+          "worst": 0.4
+        },
+        "claims_summary": {
+          "shed": 148,
+          "offered": 221,
+          "worst": 0.8333333333333334
+        }
+      },
+      "chat_alone": {
+        "member_chat": {
+          "shed": 316,
+          "offered": 1209,
+          "worst": 0.36
+        }
+      }
+    }
+  }
+}
