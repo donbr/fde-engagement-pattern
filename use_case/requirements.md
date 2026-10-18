@@ -18,7 +18,7 @@
 | R12 | Sponsor (CIO) | Each gate gives PROCEED, NARROW or STOP from thresholds agreed in advance. Proposed thresholds are labelled; a missing threshold gives no verdict. | Golden `gate_stops_when_cheap_fix_suffices`; gate tests |
 | R13 | CDO / CAIO | No model in the decision path; decisions are deterministic and identical on replay. | Determinism test; `decisions.md` |
 | R14 | Enterprise architect | Don't build a new service if a gateway already fronts the provider. | Design: the policy is a library, not a server (`decisions.md`) |
-| R15 | Sponsor, FinOps lead, Member Services ops manager | *(Added in step 8.)* **Metrics that don't exist today, from the first day of shadow mode:** calls, failures and would-sheds by workload, tier and reason; spend on actual tokens by department; estimate accuracy (actual ÷ estimate, overruns) by workload. | `test_observability.py`; the "What shadow mode shows" section of the evaluation |
+| R15 | Sponsor, FinOps lead, Member Services ops manager | *(Added in step 8.)* **Metrics that don't exist today, from the first day of shadow mode:** calls, failures and would-sheds by workload, tier and reason; spend on actual tokens by department; estimate accuracy (actual ÷ estimate, overruns) by workload. | `test_observability.py`; the output of `python -m fde_gateway.observe` (`evals/results/2026-10-18_heldout_observability.md`) |
 | R16 | Member Services ops manager, Platform lead | *(Added in step 8.)* **Provider failures (429s) attributed to the workload that suffered them**, even when every team shares one provider key. That makes M1 and M2 measurable on real traffic. | `test_observability.py`; shadow replay of `today` |
 
 ## Non-goals (this pass)

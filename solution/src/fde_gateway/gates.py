@@ -6,6 +6,7 @@ isn't PROCEED, later gates are NOT REACHED.
 
 import dataclasses
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -28,14 +29,34 @@ class Verdict:
     option: str | None = None  # the option a PROCEED or NARROW points to, if any
 
 
+KNOWN = frozenset(k for keys in NEEDS.values() for k in keys)
+
+
+def _no_duplicates(pairs: list[tuple[str, object]]) -> dict:
+    keys = [k for k, _ in pairs]
+    if dupes := sorted({k for k in keys if keys.count(k) > 1}):
+        raise ValueError(f"duplicate threshold keys {dupes}")
+    return dict(pairs)
+
+
 def load_thresholds(path: Path) -> tuple[dict[str, float], dict[str, str]]:
     """Read thresholds.json into (values, statuses).
 
+    A key may be absent (its gates report NOT DECIDABLE), but a key that is present
+    must be valid: a bad value could otherwise disable a rule silently, e.g.
+    ``m8_max: NaN`` makes the spoofing stop rule unable to fire.
+
     Raises:
-        ValueError: A status that isn't "proposed" or "signed".
+        ValueError: A duplicate or unknown key, a value that isn't a finite number,
+            or a status that isn't "proposed" or "signed".
     """
-    raw = json.loads(Path(path).read_text())
+    raw = json.loads(Path(path).read_text(), object_pairs_hook=_no_duplicates)
     for key, entry in raw.items():
+        if key not in KNOWN:
+            raise ValueError(f"unknown threshold {key!r}; expected some of {sorted(KNOWN)}")
+        value = entry.get("value")
+        if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(value):
+            raise ValueError(f"threshold {key!r} must be a finite number, got {value!r}")
         if entry.get("status") not in STATUSES:
             raise ValueError(f"threshold {key!r} has status {entry.get('status')!r}; expected one of {STATUSES}")
     return {k: e["value"] for k, e in raw.items()}, {k: e["status"] for k, e in raw.items()}

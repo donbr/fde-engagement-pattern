@@ -10,7 +10,7 @@ import json
 import statistics
 from pathlib import Path
 
-from fde_gateway.gates import CANDIDATES, evaluate_gates, load_thresholds
+from fde_gateway.gates import CANDIDATES, Verdict, evaluate_gates, load_thresholds
 from fde_gateway.options import HELD_OUT_SEEDS, OPTIONS, pooled, quota_scale, replay
 from fde_gateway.traffic import MIXES, open_enrollment_peak
 
@@ -54,9 +54,41 @@ def evaluate_mix(mix: str, seeds: range, thresholds: dict[str, float]) -> dict:
     }
     gates = evaluate_gates(metrics, thresholds)
 
-    recommended = gates["G2"].option or "option1"
-    quota = {n: quota_scale(OPTIONS[n], seeds, mix, thresholds["t_chat"]) for n in dict.fromkeys(("option1", recommended))}
-    return {"results": results, "metrics": metrics, "gates": gates, "recommended": recommended, "quota_scale": quota}
+    recommended = recommendation(gates)
+    if "t_chat" in thresholds:
+        sized = ("option1", recommended) if recommended else ("option1",)
+        quota = {n: quota_scale(OPTIONS[n], seeds, mix, thresholds["t_chat"]) for n in dict.fromkeys(sized)}
+        quota_note = ""
+    else:
+        quota, quota_note = {}, "NOT DECIDABLE: threshold t_chat not set"
+    return {"results": results, "metrics": metrics, "gates": gates, "recommended": recommended,
+            "quota_scale": quota, "quota_note": quota_note}
+
+
+def recommendation(gates: dict[str, Verdict]) -> str | None:
+    """The option the gates point to, or None when they don't point to one.
+
+    G2's option when it names one; option1 when G1 stops on it (the cheap fix meets
+    the target); otherwise None. There is no default: a gate that never ran
+    recommends nothing (step 10).
+    """
+    if gates["G2"].option:
+        return gates["G2"].option
+    if gates["G1"].verdict == "STOP":
+        return "option1"
+    return None
+
+
+def results_json(evaluations: dict[str, dict], values: dict[str, float], statuses: dict[str, str]) -> dict:
+    """The saved results: thresholds with their status (PREREGISTRATION.md), then each mix."""
+    return {
+        "thresholds": {k: {"value": v, "status": statuses[k]} for k, v in values.items()},
+        **{mix: {"metrics": ev["metrics"], "recommended": ev["recommended"], "quota_scale": ev["quota_scale"],
+                 "quota_note": ev["quota_note"],
+                 "gates": {g: {"verdict": v.verdict, "reason": v.reason} for g, v in ev["gates"].items()},
+                 "results": ev["results"]}
+           for mix, ev in evaluations.items()},
+    }
 
 
 def _cell(t: dict | None) -> str:
@@ -74,7 +106,7 @@ def report(mix: str, ev: dict, statuses: dict[str, str]) -> str:
               f"| M2 back-office share of today's chat failures | {m['m2_backoffice_share']:.0%} |"]
     for n, c in m["candidates"].items():
         lines.append(f"| M3 / M4 `{n}` | {c['m3']:.0%} of option-1 failures removed / {c['m4_points']:+.1f} pts claims sheds |")
-    q = ", ".join(f"`{n}` {s if s is not None else '> 2.0'}x" for n, s in ev["quota_scale"].items())
+    q = ", ".join(f"`{n}` {s if s is not None else '> 2.0'}x" for n, s in ev["quota_scale"].items()) or ev["quota_note"]
     lines += [f"| M5 chat alone; quota scale to reach t_chat | {m['m5_chat_alone']:.1%}; {q} |",
               f"| M6 decision p99 | {m['m6_p99_ms'] * 1000:.1f} µs |",
               f"| M8 spoofed admits / attempts | {m['m8_spoof_admits']} / {m['m8_spoof_attempts']} |",
@@ -100,12 +132,7 @@ def main() -> None:
         print(report(mix, ev, statuses) + "\n")
 
     if args.out:
-        args.out.write_text(json.dumps({
-            mix: {"metrics": ev["metrics"], "recommended": ev["recommended"], "quota_scale": ev["quota_scale"],
-                  "gates": {g: {"verdict": v.verdict, "reason": v.reason} for g, v in ev["gates"].items()},
-                  "results": ev["results"]}
-            for mix, ev in evaluations.items()
-        }, indent=2))
+        args.out.write_text(json.dumps(results_json(evaluations, values, statuses), indent=2))
 
 
 if __name__ == "__main__":

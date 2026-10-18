@@ -32,7 +32,7 @@ Each step's expected result is one of:
 
 **The gate case** gives `thresholds` and `metrics`, and expects a verdict for each gate.
 
-All three mixes run against the same workload table: `member_chat` → Member Services, CRITICAL; `claims_summary` → Claims, STANDARD; `policy_refresh` → Content Operations, DEFERRABLE.
+Both mixes run against the same workload table: `member_chat` → Member Services, CRITICAL; `claims_summary` → Claims, STANDARD; `policy_refresh` → Content Operations, DEFERRABLE.
 
 ## `thresholds.json`: pre-registered decision thresholds
 

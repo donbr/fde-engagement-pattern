@@ -3,10 +3,13 @@
 Requirements it implements (use_case/requirements.md at the repo root):
     R5  the tier comes from the caller's identity; a claimed tier is ignored and flagged.
     R6  decision records carry metadata only.
-    R7  shadow mode never blocks; ``set_enforce`` is the kill switch.
+    R7  shadow mode never blocks a known caller; ``set_enforce`` is the kill switch.
+        Unknown callers are rejected in both modes (R5; decisions.md, step 10).
     R8  counts by tier and reason.
     R10 showback on actual tokens for every call that ran, including shadow-allowed would-sheds.
     R15 per-workload metrics that don't exist today: calls, reasons, estimate accuracy.
+    R16 ``cancel`` frees a call that failed downstream (e.g. a provider 429), so it costs
+        nothing and the failure stays attributed to its workload.
 
 In shadow mode the shedder still decides, and only its would-admits draw on its
 bucket. So the shadow records what the policy *would* have done with its own
@@ -26,7 +29,7 @@ from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from fde_gateway.shedder import LoadShedder, Request
+from fde_gateway.shedder import LoadShedder, Request, _check_token_actual
 
 REASONS = ("admitted", "floor", "too_large")
 
@@ -81,7 +84,7 @@ class Gateway:
         shedders: Workload name -> the shedder that decides it. One shared instance
             for a single limit; separate instances for separate limits (option 2).
         identities: Authenticated caller identity -> workload name.
-        enforce: False is shadow mode: decide and record, never block.
+        enforce: False is shadow mode: decide and record, never block a known caller.
         log: Every decision, in order.
         running: Calls that are allowed and not yet settled: request id ->
             (workload name, whether the shedder holds tokens for it, token estimate).
@@ -92,6 +95,9 @@ class Gateway:
                  enforce: bool = True, workloads: Mapping[str, Workload] = WORKLOADS):
         if unknown := set(identities.values()) - set(workloads):
             raise ValueError(f"identities map to unknown workloads {sorted(unknown)}")
+        if unserved := set(identities.values()) - set(shedders):
+            raise ValueError(f"no shedder for workloads {sorted(unserved)}")
+        _check_bool(enforce)
         self.shedders = dict(shedders)
         self.identities = dict(identities)
         self.workloads = dict(workloads)
@@ -112,12 +118,16 @@ class Gateway:
         """Decide one call. The tier comes from ``caller``; ``claimed_workload`` is only checked, never used.
 
         Raises:
-            PermissionError: Unknown caller. Nothing is recorded but the rejection count.
-            ValueError: From the shedder, for a non-positive estimate.
+            PermissionError: Unknown caller, in either mode. Nothing is recorded but
+                the rejection count.
+            ValueError: ``request_id`` is still running (reusing it would lose its
+                hold), or from the shedder, for a non-positive estimate.
         """
         if caller not in self.identities:
             self.unknown_callers += 1
             raise PermissionError(f"unknown caller {caller!r}")
+        if request_id in self.running:
+            raise ValueError(f"request id {request_id!r} is already running")
         workload = self.workloads[self.identities[caller]]
         shedder = self.shedders[workload.name]
 
@@ -149,8 +159,13 @@ class Gateway:
         """Charge a call that ran, and settle the shedder's hold if it has one.
 
         Raises:
+            TypeError: ``token_actual`` isn't an int.
+            ValueError: ``token_actual`` is negative.
             KeyError: The call never ran (blocked or unknown) or was already settled.
+
+            The value checks run first, so a bad value leaves the call running.
         """
+        _check_token_actual(token_actual)
         workload_name, held, token_estimate = self.running.pop(request_id)
         if held:
             self.shedders[workload_name].release(request_id, token_actual)
@@ -172,7 +187,12 @@ class Gateway:
             self.shedders[workload_name].release(request_id, 0)
 
     def set_enforce(self, value: bool) -> None:
-        """The kill switch. False returns to today's behaviour: every call runs."""
+        """The kill switch. False returns to today's behaviour: every known caller's call runs.
+
+        Raises:
+            TypeError: ``value`` isn't a bool (``"false"`` would otherwise turn enforcement on).
+        """
+        _check_bool(value)
         self.enforce = value
 
     def showback(self) -> dict[str, int]:
@@ -187,3 +207,8 @@ class Gateway:
         """Per workload: department, tier, calls, allowed, decisions by reason, and estimate accuracy on settled calls (R15)."""
         return {name: {"department": self.workloads[name].department, "priority": self.workloads[name].priority, **tally}
                 for name, tally in self._by_workload.items()}
+
+
+def _check_bool(value: object) -> None:
+    if not isinstance(value, bool):
+        raise TypeError(f"enforce must be a bool, got {value!r}")

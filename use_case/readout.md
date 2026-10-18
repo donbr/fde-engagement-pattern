@@ -1,7 +1,7 @@
 # Readout: which fix keeps member chat up at peak
 
 *To: everyone in `stakeholders.md`. From: the FDE lead. Stage: end of Design & Prototype, simulated.*
-*The client is hypothetical and the traffic synthetic (`data/DATASHEET.md`). The thresholds are **proposed and unsigned** (`evals/thresholds.json`). Every number comes from the unedited held-out runs in `evals/results/`.*
+*The client is hypothetical and the traffic synthetic (`data/DATASHEET.md`). The thresholds are **proposed and unsigned** (`evals/thresholds.json`). Every number comes from the held-out runs in `evals/results/`, regenerated from code in steps 9 and 10 with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`).*
 *Amended in step 8 (`../PROCESS.md`): the first version judged the gateway only as an enforcer and missed its visibility value. The recommendation changed as a result; the gate verdicts did not.*
 
 ## 1. Headline
@@ -35,7 +35,7 @@ The product is a **decision instrument** with two parts:
 | Peak tokens by department | **none** | Member Services 49%, Content Ops 30%, Claims 21% | Member Services 62%, Content Ops 25%, Claims 14% |
 | Actual ÷ estimate | **none** | chat 0.87, claims 0.90, refresh 0.86 | chat 0.88, claims 0.90, refresh 0.86 |
 
-**The token share is the diagnosis.** When back office takes about half the peak (`baseline`), moving the refresh is the lever. When member chat takes 62% (`waves`), the lever is quota. Estimates run 10–14% high, which means every hold reserves capacity that's never used.
+**The token share is the diagnosis.** When back office takes about half the peak (`baseline`), moving the refresh is the lever. When member chat takes 62% (`waves`), the lever is quota. Actual usage comes in 10–14% under the estimate (estimates run 11–16% high), so every hold reserves capacity that's never used.
 
 ### What each fix would do
 
@@ -57,9 +57,9 @@ Chat and claims shed / offered:
 | G2: is enforcement worth it? | NARROW: the Claims owner decides (3b: M3 56%, M4 +22.2 pts) | not reached |
 
 **What would flip each verdict:**
-- **G1 → STOP** if T_chat ≥ 5.8%.
+- **G1 → STOP** if T_chat ≥ 5.83% (option 1 leaves 36/618 = 5.825%).
 - **G2 → PROCEED with 3b** if Claims accepts at least +22.2 points.
-- **3a** never passes unless the required benefit drops to 14%.
+- **3a** never passes unless the required benefit drops to 13.8% or less (it removes 5/36 = 13.9%).
 
 **What these numbers don't cover:**
 - The traffic mixes are assumed.
@@ -110,7 +110,7 @@ Chat and claims shed / offered:
 
 | Item | Where |
 | --- | --- |
-| Code | `../solution/`. `uv run pytest` runs 40 checks. `uv run python -m fde_gateway.evaluate` reproduces the fixes table; `uv run python -m fde_gateway.observe` reproduces the shadow metrics. |
+| Code | `../solution/`. `uv run pytest` runs 82 checks. `uv run python -m fde_gateway.evaluate` reproduces the fixes table; `uv run python -m fde_gateway.observe` reproduces the shadow metrics. |
 | Requirements (R1–R16) and acceptance cases | `requirements.md`, `evals/golden.jsonl` |
 | Rules fixed before the run | `evals/PREREGISTRATION.md`, `evals/thresholds.json` |
 | Decisions, including the step 8 amendment | `decisions.md` |

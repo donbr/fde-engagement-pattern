@@ -26,7 +26,7 @@ Needs Python 3.11+ and [uv](https://docs.astral.sh/uv/). From the repo root:
 
 ```bash
 cd solution
-uv run pytest                                # 40 checks
+uv run pytest                                # 82 checks
 uv run python -m fde_gateway.evaluate        # prints options and gates (saved copy: use_case/evals/results/2026-10-18_heldout.md)
 uv run python -m fde_gateway.observe         # prints shadow metrics (saved copy: use_case/evals/results/2026-10-18_heldout_observability.md)
 ```
@@ -61,7 +61,7 @@ Replace the example in the order it was written. Each file feeds the next one.
 | 2 | Accept | `use_case/evals/golden.jsonl` | A handful of acceptance cases, with expected values worked out by hand from the requirements |
 | 3 | Pre-register | `use_case/evals/PREREGISTRATION.md`, `thresholds.json`, `use_case/data/DATASHEET.md` | Metrics with denominators, gate rules and held-out data. Thresholds stay marked *proposed* until an owner signs them. |
 | 4 | Build | `solution/tests/`, then `solution/src/` | Tests fail before the code exists and pass after it. Golden cases are not edited to fit the code. |
-| 5 | Measure | `use_case/evals/results/` | One held-out run, saved unedited |
+| 5 | Measure | `use_case/evals/results/` | One held-out run; regenerated in steps 9–10 with identical counts and verdicts |
 | 6 | Decide | `use_case/decisions.md`, `cxo-story.md` §8 | A verdict at each gate, and what was *not* changed after the results |
 | 7 | Report | `use_case/readout.md` | The eight-part readout and the ask |
 

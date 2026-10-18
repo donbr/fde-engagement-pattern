@@ -163,7 +163,7 @@ This is the lesson to apply early: hear the people with inconvenient information
 | G0 | 2026-10-18 **SIM, waves** | M1, M2 | as above | M1 501/1209 = 41.4%; **M2 37%** | **NARROW: size quota** (option 1 needs ~1.9×) | — |
 | G3 | — | M1, M7, M8 | — | Not reachable in simulation | — | — |
 
-Every SIM row comes from the unedited output in `evals/results/2026-10-18_heldout.md`.
+Every SIM row comes from `evals/results/2026-10-18_heldout.md`, regenerated from code in steps 9 and 10 with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`).
 
 ### What the first results changed
 
@@ -183,7 +183,7 @@ Results 1–4 judged the gateway only as an enforcer. That missed its first valu
 | Estimate accuracy (actual ÷ estimate) | none | chat 0.87, claims 0.90, refresh 0.86 | similar |
 | Would-sheds by tier and reason | none | yes, per call | yes, per call |
 
-**The spend share is what tells the two kinds of peak apart.** When the refresh takes 30% of peak tokens, moving it is the lever. When member chat itself takes 62%, the lever is quota. Estimates run 10–14% high, which is capacity held as padding on every call. **So the gateway earns its place first as the measurement instrument (M9), before any enforcement decision.** The step 5 gate verdicts above are unchanged; they're about enforcement.
+**The spend share is what tells the two kinds of peak apart.** When the refresh takes 30% of peak tokens, moving it is the lever. When member chat itself takes 62%, the lever is quota. Actual usage comes in 10–14% under the estimate (estimates run 11–16% high), which is capacity held as padding on every call. **So the gateway earns its place first as the measurement instrument (M9), before any enforcement decision.** The step 5 gate verdicts above are unchanged; they're about enforcement.
 
 ---
 

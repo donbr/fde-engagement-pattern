@@ -1,18 +1,19 @@
 """Priority-aware load shedder for LLM API calls.
 
-Copied unchanged from the reference implementation in an earlier solution-first
-spike (not included in this repo) on 2026-10-18. The core decision rule did not change between passes; what changed
-is everything around it (gateway.py, options.py, gates.py).
+Adapted from the reference implementation in an earlier solution-first spike
+(not included in this repo). The decision rule is unchanged from that spike.
+Step 10 added input validation: ShedderConfig checks its policy and keeps a
+read-only copy of the reserves; admit rejects an id that still has an open hold;
+release validates ``token_actual`` before it touches the hold.
 
 Purpose
     Decide, immediately and without queueing, whether an LLM request may run
     under a shared token budget. Each request is either admitted or shed.
 
 Where it sits
-    Caller -> gateway -> LoadShedder -> LLM API. The gateway resolves the
-    business questions first: a policy layer maps request metadata (business
-    unit, interactive vs. batch, ...) to a priority, and a tokenizer turns the
-    payload into an estimate. The shedder only sees ``priority`` and
+    Caller -> gateway -> LoadShedder -> LLM API. The gateway maps the caller's
+    authenticated identity to a workload and its priority (gateway.py, R5); the
+    caller supplies the token estimate. The shedder only sees ``priority`` and
     ``token_estimate``; it never sees who the caller is or what the prompt says.
 
 Workflow (like a credit-card pre-authorization)
@@ -59,9 +60,11 @@ Example
     500.0
 """
 
+import math
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
+from types import MappingProxyType
 
 
 @dataclass(frozen=True)
@@ -78,7 +81,30 @@ class ShedderConfig:
 
     token_capacity: int
     token_refill_per_sec: float
-    reserves: dict[str, float] = field(default_factory=dict)
+    reserves: Mapping[str, float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """Reject a policy that can't be enforced, and freeze a private copy of the reserves.
+
+        Raises:
+            ValueError: Capacity not a positive int; refill negative or not finite;
+                no priorities; a reserve outside 0.0-1.0.
+        """
+        if isinstance(self.token_capacity, bool) or not isinstance(self.token_capacity, int) or self.token_capacity <= 0:
+            raise ValueError(f"token_capacity must be a positive int, got {self.token_capacity!r}")
+        if not _is_number(self.token_refill_per_sec) or self.token_refill_per_sec < 0:
+            raise ValueError(f"token_refill_per_sec must be a finite number >= 0, got {self.token_refill_per_sec!r}")
+        if not self.reserves:
+            raise ValueError("reserves must name at least one priority")
+        for priority, reserve in self.reserves.items():
+            if not _is_number(reserve) or not 0.0 <= reserve <= 1.0:
+                raise ValueError(f"reserve for {priority!r} must be within 0.0-1.0, got {reserve!r}")
+        # A copy, so mutating the caller's dict (or a shared module constant) can't change a running policy.
+        object.__setattr__(self, "reserves", MappingProxyType(dict(self.reserves)))
+
+
+def _is_number(value: object) -> bool:
+    return isinstance(value, int | float) and not isinstance(value, bool) and math.isfinite(value)
 
 
 @dataclass(frozen=True)
@@ -140,14 +166,18 @@ class LoadShedder:
             False if shed (balance unchanged).
 
         Raises:
-            ValueError: If the priority isn't configured or ``token_estimate <= 0``.
-                Raised before any state changes, so invalid requests aren't counted.
+            ValueError: If the priority isn't configured, ``token_estimate <= 0``, or
+                ``request.id`` still has an open hold (reusing it would overwrite the
+                hold and lose its tokens). Raised before any state changes, so invalid
+                requests aren't counted.
         """
         # Validate before touching state.
         if request.priority not in self.config.reserves:
             raise ValueError(f"unknown priority {request.priority!r}")
         if request.token_estimate <= 0:
             raise ValueError("token_estimate must be positive")
+        if request.id in self.request_ledger:
+            raise ValueError(f"request id {request.id!r} already has an open hold")
 
         self._refill()
 
@@ -176,10 +206,15 @@ class LoadShedder:
             token_actual: Tokens the LLM call really consumed.
 
         Raises:
+            TypeError: ``token_actual`` isn't an int.
+            ValueError: ``token_actual`` is negative.
             KeyError: If ``request_id`` has no open hold: never admitted, shed, or
                 already released. ``pop`` removes the hold, so a second release
                 can't refund twice.
+
+            The value checks run first, so a bad value leaves the hold open.
         """
+        _check_token_actual(token_actual)
         token_estimate = self.request_ledger.pop(request_id)
         self._refill()
         # Cap at capacity so a refund can't overfill; an overrun may go negative.
@@ -192,3 +227,11 @@ class LoadShedder:
             A copy, so callers can't modify the shedder's counters.
         """
         return {priority: dict(tally) for priority, tally in self.priority_decision_counts.items()}
+
+
+def _check_token_actual(token_actual: object) -> None:
+    """Raise TypeError or ValueError unless ``token_actual`` is an int >= 0 (not a bool)."""
+    if isinstance(token_actual, bool) or not isinstance(token_actual, int):
+        raise TypeError(f"token_actual must be an int, got {token_actual!r}")
+    if token_actual < 0:
+        raise ValueError(f"token_actual must be >= 0, got {token_actual}")

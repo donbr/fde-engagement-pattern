@@ -1,7 +1,9 @@
 """Synthetic open-enrollment peaks, exactly as specified in use_case/data/DATASHEET.md (repo root).
 
-One generator draws every stream from a single seeded RNG in a fixed order. So
-when an option drops a workload, the arrivals of the others are unchanged.
+One generator draws every stream from a single seeded RNG in a fixed order.
+Options never change the generator: they filter its output (``replay`` skips
+dropped and off-live workloads). So every option sees identical arrivals for the
+workloads it keeps.
 """
 
 import random

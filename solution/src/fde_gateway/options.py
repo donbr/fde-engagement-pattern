@@ -5,6 +5,9 @@ in what is configured:
 - which workloads leave the live limit (option 1's batch lane);
 - whether limits are shared or separate (option 2);
 - the reserves (options 3a and 3b).
+
+``shadow_replay`` (step 8) runs today's traffic through a shadow-mode gateway in
+front of today's shared provider limit, to produce the metrics in R15 and R16.
 """
 
 import heapq
@@ -83,7 +86,8 @@ def replay(arrivals: list[Arrival], option: Option, scale: float = 1.0, spoof: b
         tier and reason; spoof_attempts and spoof_critical.
     """
     now = [0.0]
-    gateway = Gateway(_shedders(option, scale, lambda: now[0]), {c: w for w, c in CALLERS.items()})
+    live = {c: w for w, c in CALLERS.items() if w not in option.off_live | option.dropped}  # only callers that reach the live gateway
+    gateway = Gateway(_shedders(option, scale, lambda: now[0]), live)
     offered = {w: 0 for w in WORKLOADS}
     shed = {w: 0 for w in WORKLOADS}
     batch_lane = {w: 0 for w in WORKLOADS}

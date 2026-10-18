@@ -1,4 +1,30 @@
 {
+  "thresholds": {
+    "t_chat": {
+      "value": 0.05,
+      "status": "proposed"
+    },
+    "m2_min": {
+      "value": 0.5,
+      "status": "proposed"
+    },
+    "m3_min": {
+      "value": 0.5,
+      "status": "proposed"
+    },
+    "m4_max_points": {
+      "value": 15,
+      "status": "proposed"
+    },
+    "m6_p99_ms_max": {
+      "value": 1.0,
+      "status": "proposed"
+    },
+    "m8_max": {
+      "value": 0,
+      "status": "proposed"
+    }
+  },
   "baseline": {
     "metrics": {
       "m1_today": 0.18284789644012944,
@@ -19,14 +45,15 @@
         }
       },
       "m5_chat_alone": 0.009708737864077669,
-      "m6_p99_ms": 0.004237839220877504,
+      "m6_p99_ms": 0.0046243688666436356,
       "m8_spoof_admits": 0,
       "m8_spoof_attempts": 221
     },
-    "recommended": "option1",
+    "recommended": null,
     "quota_scale": {
       "option1": 1.1
     },
+    "quota_note": "",
     "gates": {
       "G0": {
         "verdict": "PROCEED",
@@ -136,14 +163,15 @@
         }
       },
       "m5_chat_alone": 0.261373035566584,
-      "m6_p99_ms": 0.007552509941888275,
+      "m6_p99_ms": 0.004841459885938093,
       "m8_spoof_admits": 0,
       "m8_spoof_attempts": 221
     },
-    "recommended": "option1",
+    "recommended": null,
     "quota_scale": {
       "option1": 1.9
     },
+    "quota_note": "",
     "gates": {
       "G0": {
         "verdict": "NARROW",

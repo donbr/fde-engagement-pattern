@@ -43,7 +43,7 @@ def test_r15_unsettled_calls_are_not_in_estimate_accuracy(gateway: Gateway):
 
 
 def test_r16_shadow_replay_attributes_provider_failures_by_workload():
-    report = shadow_replay(open_enrollment_peak(200, "baseline"), STARTER)
+    report = shadow_replay(open_enrollment_peak(300, "baseline"), STARTER)
     for w in WORKLOADS:
         p = report["provider"][w]
         assert 0 <= p["failed"] <= p["offered"]
@@ -53,14 +53,14 @@ def test_r16_shadow_replay_attributes_provider_failures_by_workload():
 def test_r16_shadow_never_blocks_so_provider_failures_match_today():
     # in shadow mode the provider sees exactly today's traffic, so failures equal today's sheds
     from fde_gateway.options import OPTIONS, replay
-    arrivals = open_enrollment_peak(201, "baseline")
+    arrivals = open_enrollment_peak(301, "baseline")
     today = replay(arrivals, OPTIONS["today"])
     shadow = shadow_replay(arrivals, STARTER)
     assert {w: p["failed"] for w, p in shadow["provider"].items()} == today["shed"]
 
 
 def test_r10_r16_calls_that_failed_at_the_provider_cost_nothing():
-    arrivals = open_enrollment_peak(202, "baseline")
+    arrivals = open_enrollment_peak(302, "baseline")
     report = shadow_replay(arrivals, STARTER)
     ran = {w: report["provider"][w]["offered"] - report["provider"][w]["failed"] for w in WORKLOADS}
     actual = {w: sum(a.token_actual for a in arrivals if a.workload == w) for w in WORKLOADS}
