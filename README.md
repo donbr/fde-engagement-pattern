@@ -56,6 +56,8 @@ The gateway in the worked example is what vendors call an **AI gateway** (or **L
 | --- | --- | --- |
 | Lower tiers are shed first (`reserves`) | Load shedding by request criticality | [Google SRE book, "Handling Overload"](https://sre.google/sre-book/handling-overload/) |
 | A token budget enforced at the gateway | AI gateway token rate limiting | [Azure API Management `llm-token-limit`](https://learn.microsoft.com/en-us/azure/api-management/llm-token-limit-policy), [Kong AI Rate Limiting Advanced](https://developer.konghq.com/plugins/ai-rate-limiting-advanced/), [Envoy AI Gateway usage-based rate limiting](https://aigateway.envoyproxy.io/docs/capabilities/traffic/usage-based-ratelimiting) |
+| A hold on the estimate, settled on actual tokens (`release`) | Estimate, then reconcile; a limit can briefly overshoot | [Azure API Management `llm-token-limit`, "Considerations for token counts and estimation"](https://learn.microsoft.com/en-us/azure/api-management/llm-token-limit-policy#considerations-for-token-counts-and-estimation): concurrent requests can temporarily exceed the limit, because actual usage is known only after the response |
+| One bucket per process; a second replica needs shared counters | Distributed rate-limit counters | [Kong AI Rate Limiting Advanced](https://developer.konghq.com/plugins/ai-rate-limiting-advanced/): `local` counters diverge as nodes scale, `cluster` or `redis` share them. [`llm-token-limit`](https://learn.microsoft.com/en-us/azure/api-management/llm-token-limit-policy) counts per gateway and doesn't aggregate across regional gateways. |
 | A protected share of capacity per tier | Priority levels with protected shares | [Kubernetes API Priority and Fairness](https://kubernetes.io/docs/concepts/cluster-administration/flow-control/) |
 | Sheddable traffic for self-hosted model serving | Inference gateway with per-objective priority | [Gateway API Inference Extension](https://gateway-api-inference-extension.sigs.k8s.io/) ([CNCF deep dive](https://www.cncf.io/blog/2025/04/21/deep-dive-into-the-gateway-api-inference-extension/)) |
 | Shadow mode before enforcement | Shadow or dark launch | — |
@@ -73,7 +75,7 @@ The vendor limiters above key their limits by subscription, consumer, user or mo
 | [`use_case/stakeholders.md`](./use_case/stakeholders.md), [`ecosystem.md`](./use_case/ecosystem.md) | Carried over from the earlier spike, with changes |
 | [`use_case/evals/`](./use_case/evals/) | Five acceptance cases, `PREREGISTRATION.md`, `thresholds.json`, `results/` |
 | [`use_case/data/DATASHEET.md`](./use_case/data/DATASHEET.md) | Traffic spec, held-out seeds, what it can't validate |
-| [`use_case/decisions.md`](./use_case/decisions.md) | 27 decisions by step, including what was **not** changed after the results, and the step 8 amendment |
+| [`use_case/decisions.md`](./use_case/decisions.md) | 28 decisions by step, including what was **not** changed after the results, and the step 8 amendment |
 | [`use_case/readout.md`](./use_case/readout.md) | The report: headline, what it does, numbers, cost, running it for real, risks, recommendation, handover, and the ask |
 | [`solution/`](./solution/) | `fde_gateway`: shedder core, identity-aware shadow-mode gateway, options replay, gates, evaluation |
 
