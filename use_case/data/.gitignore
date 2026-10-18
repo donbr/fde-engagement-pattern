@@ -1,0 +1,4 @@
+# Real data never lands here. The datasheet is committed; everything else is ignored.
+*
+!.gitignore
+!DATASHEET.md
