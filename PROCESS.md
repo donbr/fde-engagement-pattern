@@ -25,7 +25,7 @@ The order this work was done in, timestamped when each step finished. The point 
 
 ## Publication and review (steps 9 onward)
 
-Repo maintenance after the engagement: making it public, two review rounds, the rename and the documentation pass. The engagement's counts, metrics and verdicts didn't change.
+Repo maintenance after the engagement: making it public, two review rounds, the rename and the documentation passes. The engagement's counts, metrics and verdicts didn't change.
 
 | Step | Stage | What was done | Finished |
 | --- | --- | --- | --- |
@@ -35,6 +35,7 @@ Repo maintenance after the engagement: making it public, two review rounds, the 
 | 12 | Re-run fixes | A re-run of the review found 2 blockers and 6 important issues. Fixed test-first in `tests/test_rerun_fixes.py` (30 new checks; 18 red before the fixes): tier-reserve check, `token_estimate` validation, attribution by identity in `shadow_replay`, threshold units, pickling of `ShedderConfig`, settle-after-release ordering, `allow_nan=False`, plus the rated test gaps (G2 option, refund cap, observability snapshot, end-to-end G2 PROCEED, formulas). Corrected the step 10 claims about seeds, mutation counts (33 of 38) and the evidence of order; "never blocks" now says "a known caller" in 8 places (one is the `why` text of a golden case; its expected values are unchanged). Results unchanged (observe byte-identical; evaluate differs only in M6). Then rewrote the whole history with `git filter-repo --replace-text` to remove the training material from commits 0–10 (the snippet, the course wording, the stub paragraph) and fix the "final published form" note in commit messages. 112 passed. | 2026-10-18 |
 | 13 | Publish | Renamed the repo from `fde-mindset` to `fde-engagement-pattern` (`README.md` title, `cxo-story.md` byline); the Python package stays `fde-gateway`. Published to GitHub as a public repository. | 2026-10-18 |
 | 14 | Docs | A concept review of the public repo found the pattern well captured but hard to enter from outside. Added a pattern diagram, a key-concepts table and a "Where this sits in industry" table (with links) to `README.md`; split this log into the engagement and publication tables; made two reuse rows generic; corrected two lines in `cxo-story.md` and the "peak tokens" labels; added forward pointers to three superseded decisions; fixed docstring references (R1, R4, R9, R11, R13, `--thresholds`). No code behaviour or result changed. | 2026-10-18 |
+| 15 | Docs | Added two rows to the README's industry table (a limit can briefly overshoot when holds are estimates; counters across replicas) and noted prompt caching beside the option ladder in `cxo-story.md` §2, as a later, unevaluated addition (`decisions.md`). Vendor claims checked against current docs. No code or result changed. | 2026-10-18 |
 
 ## Evidence of order
 

@@ -41,6 +41,8 @@ The client is hypothetical (a regional health insurer, an illustrative example).
 
 **Order of recommendation:** 1 first. Then measure. Then 3 only if the gap is worth it, compared against 2. Then 4, sized by what remains. Each step's data decides whether the next one happens.
 
+**Also cheap, and missing from the ladder above** *(added in step 15; not simulated or evaluated)*: **cache the repeated prompt prefix** (system instructions, static policy text). It's a config change, done in days. How much limit it frees depends on the provider: on [Anthropic's API](https://platform.claude.com/docs/en/api/rate-limits#cache-aware-itpm), cache reads don't count toward the input-tokens-per-minute limit for most models, while a combined tokens-per-minute limit may count cached tokens too. The synthetic traffic has no prompt content, so this example can't estimate the effect. On a real engagement, measure the repeated-prefix share of input tokens and check the provider's rules; if both favour it, run it alongside option 1. The options, gates and verdicts above are unchanged.
+
 ### The gateway has two values, decided separately *(amended in step 8)*
 
 | Value | What it gives | When it earns its place | Risk |
