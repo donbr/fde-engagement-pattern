@@ -110,7 +110,7 @@ Chat and claims shed / offered:
 
 | Item | Where |
 | --- | --- |
-| Code | `../solution/`. `uv run pytest` runs 82 checks. `uv run python -m fde_gateway.evaluate` reproduces the fixes table; `uv run python -m fde_gateway.observe` reproduces the shadow metrics. |
+| Code | `../solution/`. `uv run pytest` runs every check, including snapshots of the saved results. `uv run python -m fde_gateway.evaluate` reproduces the fixes table; `uv run python -m fde_gateway.observe` reproduces the shadow metrics. |
 | Requirements (R1–R16) and acceptance cases | `requirements.md`, `evals/golden.jsonl` |
 | Rules fixed before the run | `evals/PREREGISTRATION.md`, `evals/thresholds.json` |
 | Decisions, including the step 8 amendment | `decisions.md` |
