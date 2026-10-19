@@ -1,8 +1,10 @@
 # fde-engagement-pattern: a forward-deployed engagement pattern, with one worked example
 
+[![ci](https://github.com/donbr/fde-engagement-pattern/actions/workflows/ci.yml/badge.svg)](https://github.com/donbr/fde-engagement-pattern/actions/workflows/ci.yml)
+
 **Forward Deployed Engineering (FDE)** is a consultative practice. A small group of engineers, either inside an organization or serving its clients, embeds with a business owner. Together they define the problem, prove a fix against numbers agreed in advance, and hand it over so it runs without them. The practice is older than AI engineering: it grew out of field engineering, solutions engineering and internal consulting groups. AI workloads raise the cost of building before measuring, but the discipline is the same.
 
-This repo packages that practice as a reusable pattern: **define → accept → pre-register → build (tests first) → measure → decide → report.** The worked example is a load-shedding gateway, which does priority-based admission control in front of a shared LLM rate limit. The pattern is the files and the order they were written in, not the gateway. See [`PROCESS.md`](./PROCESS.md) for the timestamped order of work, and [Reusing this pattern](#reusing-this-pattern) to apply it to your own use case.
+This repo packages that practice as a reusable pattern: **define → accept → pre-register → build (tests first) → measure → decide → report.** The worked example is a load-shedding gateway, which does priority-based admission control in front of a shared LLM rate limit. The pattern is the files and the order they were written in, not the gateway. See [`PROCESS.md`](./PROCESS.md) for the timestamped order of work, [`AUDIT.md`](./AUDIT.md) to check those claims yourself in about 10 minutes, and [Reusing this pattern](#reusing-this-pattern) to apply it to your own use case.
 
 ```mermaid
 flowchart LR
@@ -78,12 +80,13 @@ The vendor limiters above key their limits by subscription, consumer, user or mo
 | [`use_case/decisions.md`](./use_case/decisions.md) | 28 decisions by step, including what was **not** changed after the results, and the step 8 amendment |
 | [`use_case/readout.md`](./use_case/readout.md) | The report: headline, what it does, numbers, cost, running it for real, risks, recommendation, handover, and the ask |
 | [`solution/`](./solution/) | `fde_gateway`: shedder core, identity-aware shadow-mode gateway, options replay, gates, evaluation |
+| [`AUDIT.md`](./AUDIT.md), [`scripts/check_history.py`](./scripts/check_history.py) | Each claim with the command that checks it; the pre-registration lock that CI runs on every push |
 
 Needs Python 3.11+ and [uv](https://docs.astral.sh/uv/). From the repo root:
 
 ```bash
 cd solution
-uv run pytest                                # 82 checks
+uv run pytest                                # all checks, including snapshots of the saved results
 uv run python -m fde_gateway.evaluate        # prints options and gates (saved copy: use_case/evals/results/2026-10-18_heldout.md)
 uv run python -m fde_gateway.observe         # prints shadow metrics (saved copy: use_case/evals/results/2026-10-18_heldout_observability.md)
 ```
