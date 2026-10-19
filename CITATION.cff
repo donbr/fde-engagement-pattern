@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you reuse this pattern or its worked example, please cite it as below."
+title: "fde-engagement-pattern: a forward-deployed engagement pattern, with one worked example"
+abstract: >-
+  Define, accept, pre-register, build (tests first), measure, decide, report: a
+  forward-deployed engineering pattern, worked through on a priority gateway for a
+  shared LLM rate limit (hypothetical health insurer, synthetic traffic).
+type: software
+authors:
+  - given-names: Don
+    family-names: Branson
+repository-code: "https://github.com/donbr/fde-engagement-pattern"
+license: MIT
+version: 1.0.0
+date-released: 2026-10-18
+keywords:
+  - forward-deployed-engineering
+  - pre-registration
+  - load-shedding
+  - rate-limiting
+  - llm
+  - ai-engineering

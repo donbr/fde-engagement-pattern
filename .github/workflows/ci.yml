@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Tests (including the snapshot tests that regenerate the published results), lint and types.
+  solution:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
+    defaults:
+      run:
+        working-directory: solution
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: solution/uv.lock
+      - run: uv sync --locked
+      - run: uv run pytest
+      - run: uv run ruff check . ../scripts
+      - run: uv run pyright
+
+  # The pre-registration lock: evidence files in step order; cases and threshold values unchanged.
+  history:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 scripts/check_history.py
