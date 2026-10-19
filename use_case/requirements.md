@@ -15,7 +15,7 @@
 | R9 | SRE lead | The added decision latency is negligible next to the model call. | M6 (p99), threshold `m6_p99_ms_max` |
 | R10 | FinOps lead | Spend is charged on **actual** tokens for every call that ran, including calls that shadow mode allowed but would have shed. Calls that never ran cost nothing. | Golden `showback_charges_what_ran` |
 | R11 | CFO / CIO | Before buying quota, know how much is needed. | M5 and the quota-scale search |
-| R12 | Sponsor (CIO) | Each gate gives PROCEED, NARROW or STOP from thresholds agreed in advance. Proposed thresholds are labelled; a missing threshold gives no verdict. | Golden `gate_stops_when_cheap_fix_suffices`; gate tests |
+| R12 | Sponsor (CIO or COO) | Each gate gives PROCEED, NARROW or STOP from thresholds agreed in advance. Proposed thresholds are labelled; a missing threshold gives no verdict. | Golden `gate_stops_when_cheap_fix_suffices`; gate tests |
 | R13 | CDO / CAIO | No model in the decision path; decisions are deterministic and identical on replay. | Determinism test; `decisions.md` |
 | R14 | Enterprise architect | Don't build a new service if a gateway already fronts the provider. | Design: the policy is a library, not a server (`decisions.md`) |
 | R15 | Sponsor, FinOps lead, Member Services ops manager | *(Added in step 8.)* **Metrics that don't exist today, from the first day of shadow mode:** calls, failures and would-sheds by workload, tier and reason; spend on actual tokens by department; estimate accuracy (actual ÷ estimate, overruns) by workload. | `test_observability.py`; the output of `python -m fde_gateway.observe` (`evals/results/2026-10-18_heldout_observability.md`) |

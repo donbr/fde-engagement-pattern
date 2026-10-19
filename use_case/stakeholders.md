@@ -11,6 +11,7 @@ Roles only, never names.
 | Stage | Who (role) | What I'd ask | What clears them | Status |
 | --- | --- | --- | --- | --- |
 | Design & Prototype, week 1 | **Member-service agent** (the person with the problem) | "Walk me through the last time the assistant failed mid-chat. What did you do next, and how long did it take?" | Seeing the chat SLA hold at the next peak. | planned |
+| Design & Prototype, week 1 | **COO / Member Services owner** (owns the P&L) | "Will your people's numbers move? Who on your side sets the member-chat target?" | M1 against T_chat, which their Member Services operations manager signs. If the cheap fix meets it, the work stops there, and that is good news for them. | planned (added in step 17) |
 | Design & Prototype, week 1 | **Member Services operations manager** (owns the SLA; signs the tier table) | "What does a failed or late chat cost you? Which work, if any, counts as more important than a member chat? **What peak failure rate is acceptable (T_chat)?**" | KPI deltas in their own metrics; they decide what counts as CRITICAL. | planned |
 | Design & Prototype, week 1 | **Platform engineering lead** | "Where would a small container run here? Is there an API gateway in front of the model provider already?" | A draft deployment pattern to correct, not a blank page (`ecosystem.md`). | planned |
 | Design & Prototype, week 2 | **CISO / privacy officer** (veto) | "Can I get on your architecture review in week two, before we build?" | The blast radius: it only decides admit or shed, never reads content, runs under its own identity, has a kill switch. BAA with the model vendor; no PHI in logs. | planned |
@@ -21,7 +22,7 @@ Roles only, never names.
 | Build & Deploy | **FinOps lead / CFO delegate** (veto via procurement) | "What showback format do you already read? Do you want spend caps per department?" | Spend by department without manual work. Quota sized from the measured shortfall. | planned |
 | Build & Deploy | **Enterprise architect / CTO delegate** | "What review does a new gateway policy need, and how long does it take?" | Eval baseline, runbook with a kill switch, the scaling answer (shared counters at a second replica). | planned |
 | Build & Deploy | **SRE / on-call lead** | "Who gets paged when sheds spike, and what's the rollback?" | Runbook, dashboards (sheds by tier and reason), shadow mode first. | planned |
-| Each stage gate | **Sponsor (CIO)** (go / no-go) | "Proceed, narrow, or stop at this gate?" | A staged roadmap with gates; one forum with named owners. | planned |
+| Each stage gate | **Sponsor (CIO or COO)** (go / no-go) | "Proceed, narrow, or stop at this gate?" | A staged roadmap with gates; one forum with named owners. | planned |
 | Throughout | **FDE practice lead** (my own manager) | "Which parts of this can the practice reuse on the next engagement: the discovery method, the option ladder or the gateway policy pack?" | A handover that works without me, and a pattern the next engagement can start from. | planned |
 
 ---
@@ -33,5 +34,5 @@ Coverage check against a standard FDE stakeholder checklist:
 - **The person with the problem:** the member-service agent. They get shown the shadow-run numbers first.
 - **Whoever owns the data:** the usage and 429 logs owner.
 - **Whoever runs the platform:** the platform engineering lead and SRE.
-- **Whoever approves:** CISO (security), CDO / CAIO (the AI use case), FinOps (spend), enterprise architect (design), sponsor (go/no-go).
+- **Whoever approves:** CISO (security), CDO / CAIO (the AI use case), FinOps (spend), enterprise architect (design), sponsor (CIO or COO; go/no-go). The COO / Member Services owner owns the P&L the problem lands on.
 - **My own manager:** the FDE practice lead. That is the head of the group for an internal FDE team, or the engagement lead when the FDEs serve outside clients.
