@@ -14,6 +14,7 @@ Roles only, never names.
 | Design & Prototype, week 1 | **Member Services operations manager** (owns the SLA; signs the tier table) | "What does a failed or late chat cost you? Which work, if any, counts as more important than a member chat? **What peak failure rate is acceptable (T_chat)?**" | KPI deltas in their own metrics; they decide what counts as CRITICAL. | planned |
 | Design & Prototype, week 1 | **Platform engineering lead** | "Where would a small container run here? Is there an API gateway in front of the model provider already?" | A draft deployment pattern to correct, not a blank page (`ecosystem.md`). | planned |
 | Design & Prototype, week 2 | **CISO / privacy officer** (veto) | "Can I get on your architecture review in week two, before we build?" | The blast radius: it only decides admit or shed, never reads content, runs under its own identity, has a kill switch. BAA with the model vendor; no PHI in logs. | planned |
+| Design & Prototype, week 2 | **CDO / CAIO** (admits the use case) | "Does this go through AI use-case intake when no model makes the decision, and what would you need to see?" | No agent, on purpose: a deterministic control that is fast, explainable and identical on replay (R13; M6 and the golden cases). | planned (added in step 17) |
 | Design & Prototype, week 2 | **Data owner for usage and 429 logs** (often platform or FinOps) | "Can I get provider usage and 429s by API key for last open enrollment?" | A written purpose and retention limit. This is the baseline. | planned |
 | Design & Prototype, week 2 | **Claims operations manager** | "What does a summary that arrives an hour late cost? Could claims wait while members are on hold? **How many extra points of claims sheds would you accept to protect chat?**" | Seeing the trade-off as numbers: protecting chat raises claims sheds (`CHARTER.md` § Success). | planned |
 | Design & Prototype, week 2 | **Content Operations owner** (nightly policy refresh) | "How fresh must the refresh be? Could it run on the provider's batch lane?" | The refresh never competes with members, and it gets cheaper. | planned |
@@ -32,5 +33,5 @@ Coverage check against a standard FDE stakeholder checklist:
 - **The person with the problem:** the member-service agent. They get shown the shadow-run numbers first.
 - **Whoever owns the data:** the usage and 429 logs owner.
 - **Whoever runs the platform:** the platform engineering lead and SRE.
-- **Whoever approves:** CISO (security), FinOps (spend), enterprise architect (design), sponsor (go/no-go).
+- **Whoever approves:** CISO (security), CDO / CAIO (the AI use case), FinOps (spend), enterprise architect (design), sponsor (go/no-go).
 - **My own manager:** the FDE practice lead. That is the head of the group for an internal FDE team, or the engagement lead when the FDEs serve outside clients.

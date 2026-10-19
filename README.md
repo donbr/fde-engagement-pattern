@@ -77,7 +77,7 @@ The vendor limiters above key their limits by subscription, consumer, user or mo
 | [`use_case/stakeholders.md`](./use_case/stakeholders.md), [`ecosystem.md`](./use_case/ecosystem.md) | Carried over from the earlier spike, with changes |
 | [`use_case/evals/`](./use_case/evals/) | Five acceptance cases, `PREREGISTRATION.md`, `thresholds.json`, `results/` |
 | [`use_case/data/DATASHEET.md`](./use_case/data/DATASHEET.md) | Traffic spec, held-out seeds, what it can't validate |
-| [`use_case/decisions.md`](./use_case/decisions.md) | 28 decisions by step, including what was **not** changed after the results, and the step 8 amendment |
+| [`use_case/decisions.md`](./use_case/decisions.md) | 29 decisions by step, including what was **not** changed after the results, and the step 8 amendment |
 | [`use_case/readout.md`](./use_case/readout.md) | The report: headline, what it does, numbers, cost, running it for real, risks, recommendation, handover, and the ask |
 | [`solution/`](./solution/) | `fde_gateway`: shedder core, identity-aware shadow-mode gateway, options replay, gates, evaluation |
 | [`AUDIT.md`](./AUDIT.md), [`scripts/check_history.py`](./scripts/check_history.py) | Each claim with the command that checks it; the pre-registration lock that CI runs on every push |
