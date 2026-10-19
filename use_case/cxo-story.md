@@ -98,15 +98,15 @@ Every metric has a numerator and a denominator. The proposed starting points are
 
 | Metric | Definition | Baseline source | Owner | Proposed threshold (owner to confirm) |
 | --- | --- | --- | --- | --- |
-| **M1** Member-chat failure rate at peak | Chats failed or shed ÷ chats attempted, in peak windows | Last open enrollment's 429 logs by key | Member Services ops manager | Target **T_chat**, from the chat SLA |
-| **M2** Share of failures caused by back-office load | Failures in minutes where refresh or claims volume is above normal ÷ all failures | Same logs | Platform lead | Over half means H2 holds |
-| **M3** Gateway's extra benefit | (Failures after option 1 − would-be failures with the gateway) ÷ failures after option 1 | Shadow run, after option 1 | Member Services ops manager | Removes at least half of what's left |
-| **M4** What it costs Claims | Claims calls shed ÷ claims calls attempted, gateway vs no gateway | Shadow run | Claims ops manager | Within the Claims owner's stated limit |
-| **M5** Remaining shortfall | Chat failures with no other traffic competing (chat-only windows, or the burst analysis) | Shadow run | CIO / FinOps | Sizes the quota purchase; no pass/fail |
-| **M6** Added latency | p99 gateway decision time | Shadow run | SRE lead | Small next to model latency; the SRE lead sets the number |
-| **M7** Showback used | Finance produces spend by department with no manual reconciliation | Month-end close | FinOps lead | Yes or no |
-| **M8** Fail-closed holds | Calls with an unknown workload ÷ all calls, plus spoofing attempts caught in the red-team | Shadow run and red-team | CISO | Zero calls admitted with a spoofed tier |
-| **M9** *(step 8)* Metrics that didn't exist before | Can the sponsor read M1, M2, M4 and M7 **by workload and department** without manual work? Before the gateway, and with it in shadow mode. | Platform lead (before); shadow run (with) | Sponsor | Yes/no. "No before, yes with" is the visibility value. |
+| **M1** Member-chat failure rate at peak | Chats failed or shed ÷ chats attempted, in peak windows | Last open enrollment's 429 logs by key | Member Services operations manager | Target **T_chat**, from the chat SLA |
+| **M2** Share of failures caused by back-office load | Failures in minutes where refresh or claims volume is above normal ÷ all failures | Same logs | Platform engineering lead | Over half means H2 holds |
+| **M3** Gateway's extra benefit | (Failures after option 1 − would-be failures with the gateway) ÷ failures after option 1 | Shadow run, after option 1 | Member Services operations manager | Removes at least half of what's left |
+| **M4** What it costs Claims | Claims calls shed ÷ claims calls attempted, gateway vs no gateway | Shadow run | Claims operations manager | Within the Claims owner's stated limit |
+| **M5** Remaining shortfall | Chat failures with no other traffic competing (chat-only windows, or the burst analysis) | Shadow run | Sponsor (CIO), FinOps lead / CFO delegate | Sizes the quota purchase; no pass/fail |
+| **M6** Added latency | p99 gateway decision time | Shadow run | SRE / on-call lead | Small next to model latency; the SRE lead sets the number |
+| **M7** Showback used | Finance produces spend by department with no manual reconciliation | Month-end close | FinOps lead / CFO delegate | Yes or no |
+| **M8** Fail-closed holds | Calls with an unknown workload ÷ all calls, plus spoofing attempts caught in the red-team | Shadow run and red-team | CISO / privacy officer | Zero calls admitted with a spoofed tier |
+| **M9** *(step 8)* Metrics that didn't exist before | Can the sponsor read M1, M2, M4 and M7 **by workload and department** without manual work? Before the gateway, and with it in shadow mode. | Platform lead (before); shadow run (with) | Sponsor (CIO) | Yes/no. "No before, yes with" is the visibility value. |
 
 ---
 

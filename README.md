@@ -48,6 +48,7 @@ The client is **hypothetical** (a regional health insurer) and the traffic is **
 | **Visibility vs enforcement** | Two values of the same component, judged separately. Visibility (metrics that didn't exist before) often justifies it before enforcement does. |
 | **Acceptance (golden) cases** | A handful of cases whose expected outputs are worked out by hand from the requirements, before code exists, and never edited to fit the code. |
 | **Who / What / Wow** | A one-line outcome statement: who benefits, what changes for them, and the result they'd notice. |
+| **Stakeholder log** | One row per conversation, by role, starting with the person with the problem: what I'd ask, what clears them, what they still owe, and when it happened. Requirements, threshold owners and the readout's recipients all come from it. |
 | **Decision log** | One row per decision, naming the option rejected and **what would change my mind**. |
 
 ## Where this sits in industry
@@ -73,11 +74,12 @@ The vendor limiters above key their limits by subscription, consumer, user or mo
 | --- | --- |
 | [`use_case/cxo-story.md`](./use_case/cxo-story.md) | The pitch, hypotheses, pre-registered metrics, gates with stop rules, and the **results log** |
 | [`use_case/CHARTER.md`](./use_case/CHARTER.md) | Problem, success, first product: **a decision instrument** |
-| [`use_case/requirements.md`](./use_case/requirements.md) | R1–R16 traced to stakeholder roles (R15 and R16 added in step 8), plus non-goals and anti-goals |
-| [`use_case/stakeholders.md`](./use_case/stakeholders.md), [`ecosystem.md`](./use_case/ecosystem.md) | Carried over from the earlier spike, with changes |
+| [`use_case/requirements.md`](./use_case/requirements.md) | R1–R17 traced to stakeholder roles (R15 and R16 added in step 8, R17 in step 17), plus non-goals and anti-goals |
+| [`use_case/stakeholders.md`](./use_case/stakeholders.md) | The conversations planned with each role, starting with the person with the problem: what I'd ask, what clears them, what they still owe. Every role named anywhere else traces to a row here. |
+| [`use_case/ecosystem.md`](./use_case/ecosystem.md) | What the firm will let it run on, who to ask, and the approval gates with their lead times |
 | [`use_case/evals/`](./use_case/evals/) | Five acceptance cases, `PREREGISTRATION.md`, `thresholds.json`, `results/` |
 | [`use_case/data/DATASHEET.md`](./use_case/data/DATASHEET.md) | Traffic spec, held-out seeds, what it can't validate |
-| [`use_case/decisions.md`](./use_case/decisions.md) | 28 decisions by step, including what was **not** changed after the results, and the step 8 amendment |
+| [`use_case/decisions.md`](./use_case/decisions.md) | 31 decisions by step, including what was **not** changed after the results, and the step 8 amendment |
 | [`use_case/readout.md`](./use_case/readout.md) | The report: headline, what it does, numbers, cost, running it for real, risks, recommendation, handover, and the ask |
 | [`solution/`](./solution/) | `fde_gateway`: shedder core, identity-aware shadow-mode gateway, options replay, gates, evaluation |
 | [`AUDIT.md`](./AUDIT.md), [`scripts/check_history.py`](./scripts/check_history.py) | Each claim with the command that checks it; the pre-registration lock that CI runs on every push |
@@ -117,7 +119,7 @@ Replace the example in the order it was written. Each file feeds the next one.
 | Order | Stage | Replace | What it must say before you move on |
 | :---: | --- | --- | --- |
 | 0 | Pitch | `use_case/cxo-story.md` §1–§7 | The outcome, the options in cost order, hypotheses that can come out false, metrics, and gates with stop rules. Written before any implementation. |
-| 1 | Define | `use_case/CHARTER.md`, `stakeholders.md`, `requirements.md` | The problem in one sentence with no solution in it, who owns each number, and requirements traced to roles |
+| 1 | Define | `use_case/CHARTER.md`, `stakeholders.md`, `requirements.md` | The problem in one sentence with no solution in it; the people you'll talk to, starting with the person with the problem, and what each owes; requirements traced to those people |
 | 2 | Accept | `use_case/evals/golden.jsonl` | A handful of acceptance cases, with expected values worked out by hand from the requirements |
 | 3 | Pre-register | `use_case/evals/PREREGISTRATION.md`, `thresholds.json`, `use_case/data/DATASHEET.md` | Metrics with denominators, gate rules and held-out data. Thresholds stay marked *proposed* until an owner signs them. |
 | 4 | Build | `solution/tests/`, then `solution/src/` | Tests fail before the code exists and pass after it. Golden cases are not edited to fit the code. |

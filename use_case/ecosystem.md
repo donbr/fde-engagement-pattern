@@ -63,19 +63,19 @@ Thirty ecosystem questions, adapted from FDE training material. ✓ means answer
 | Network | Internet access? Proxy? | ✓ #5 | — | — |
 | Network | Egress allowlist; who adds to it? | The provider API host must be on it | Network / security engineering | Usually the longest wait |
 | Network | Which VPC or VNet; internal reach? | The app subnet; reaches the provider via the proxy only | Network engineering | — |
-| Data | What classification may it process? | PHI flows *through* it; the gateway reads none of it | Privacy officer | Approve the blast radius, not the use case |
-| Data | May data leave the region? | Governed by the provider BAA and region | Privacy officer | Fixes which provider region |
-| Data | Prompt and response retention? | The gateway keeps none; it logs metadata only | Privacy officer | Logs carry ids, tiers and token counts, never text |
+| Data | What classification may it process? | PHI flows *through* it; the gateway reads none of it | CISO / privacy officer | Approve the blast radius, not the use case |
+| Data | May data leave the region? | Governed by the provider BAA and region | CISO / privacy officer | Fixes which provider region |
+| Data | Prompt and response retention? | The gateway keeps none; it logs metadata only | CISO / privacy officer | Logs carry ids, tiers and token counts, never text |
 | Data | DLP on egress? | Likely at the proxy | Security engineering | Adds latency to every call; measure it |
 | Models | Approved internal LLM endpoint? | ✓ #8 | — | — |
 | Models | Open-weights download allowed? | Not needed | — | — |
 | Models | Model registry or approval? | Model choice stays with each workload | AI CoE | The gateway is model-agnostic |
-| Legacy | What must it integrate with; owner? | Chat platform, claims summarizer, refresh job | Each workload owner | Each caller changes one call site |
-| Legacy | Real-time or batch? | Chat and claims real-time; refresh batch | Content Operations | The refresh moves to the batch lane |
+| Legacy | What must it integrate with; owner? | Chat platform, claims summarizer, refresh job | Member Services operations manager, Claims operations manager, Content Operations owner | Each caller changes one call site |
+| Legacy | Real-time or batch? | Chat and claims real-time; refresh batch | Content Operations owner | The refresh moves to the batch lane |
 | Process | Who approves a deployment? | ✓ #7 | — | — |
-| Process | Required review; how long? | Architecture review and change board | Enterprise architect | See the map below |
-| Process | On call once live? | SRE, with the platform team as backup | SRE lead | Runbook and kill switch before go-live |
-| Process | Rollback procedure? | Turn off the policy; calls pass straight through as they do today | SRE lead | The kill switch *is* the rollback: it returns to today's behaviour |
+| Process | Required review; how long? | Architecture review and change board | Enterprise architect / CTO delegate | See the map below |
+| Process | On call once live? | SRE, with the platform team as backup | SRE / on-call lead | Runbook and kill switch before go-live |
+| Process | Rollback procedure? | Turn off the policy; calls pass straight through as they do today | SRE / on-call lead | The kill switch *is* the rollback: it returns to today's behaviour |
 
 **The question that isn't on the list:** "What usually goes wrong?" Likely answers for this kind of gateway:
 - The TLS-intercepting proxy breaks the provider SDK inside containers.
@@ -90,12 +90,12 @@ Thirty ecosystem questions, adapted from FDE training material. ✓ means answer
 
 | What (gate) | Who | How long (estimate, to confirm) | What they need |
 | --- | --- | --- | --- |
-| Architecture review | Enterprise architect | 2–3 weeks to get a slot | Data-flow diagram with boundary crossings; `decisions.md` |
+| Architecture review | Enterprise architect / CTO delegate | 2–3 weeks to get a slot | Data-flow diagram with boundary crossings; `decisions.md` |
 | Security and privacy sign-off | CISO / privacy officer | 2–4 weeks | Threat model (OWASP agentic list); blast-radius statement; no-PHI-in-logs evidence |
 | Egress allowlist entry | Network / security engineering | 1–2 weeks | Provider host, port, purpose, owner |
 | Image scan and signing | Security engineering | Days, once the pipeline exists | An image built from the mandated base |
-| Tier policy sign-off | Member Services and Claims ops managers | One meeting, if they see the trade-off numbers | `CHARTER.md` § Success table; the replay rerun with their settings |
+| Tier policy sign-off | Member Services operations manager, Claims operations manager | One meeting, if they see the trade-off numbers | `CHARTER.md` § Success table; the replay rerun with their settings |
 | Change approval | Change advisory board | Next scheduled board | Runbook, kill switch, rollback = policy off |
-| Shadow run before enforcement | SRE lead + Member Services | One peak period | Dashboards: would-be sheds by tier, spend by department |
+| Shadow run before enforcement | SRE / on-call lead, Member Services operations manager | One peak period | Dashboards: would-be sheds by tier, spend by department |
 
 **Critical path:** the security review and the egress entry run in parallel from week 2. That's why the CISO conversation is in week 2 of `stakeholders.md`, not at the end.

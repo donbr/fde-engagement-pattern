@@ -3,6 +3,7 @@
 *To: everyone in `stakeholders.md`. From: the FDE lead. Stage: end of Design & Prototype, simulated.*
 *The client is hypothetical and the traffic synthetic (`data/DATASHEET.md`). The thresholds are **proposed and unsigned** (`evals/thresholds.json`). Every number comes from the held-out runs in `evals/results/`, regenerated from code in steps 9 and 10 with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`).*
 *Amended in step 8 (`../PROCESS.md`): the first version judged the gateway only as an enforcer and missed its visibility value. The recommendation changed as a result; the gate verdicts did not.*
+*Amended in step 17: the person with the problem now sees the shadow numbers first (R17), the ask names each role as `stakeholders.md` does, and it adds the data owner, whose logs are the real baseline. No number, verdict or recommendation changed.*
 
 ## 1. Headline
 
@@ -84,8 +85,9 @@ Chat and claims shed / offered:
 | --- | --- |
 | Week 1 | Ask the platform lead how many provider keys there are and what provider reporting breaks out (H9). |
 | Weeks 1–2 | **Option 1:** move the refresh. It helps in both kinds of peak. |
+| Week 2 | Ask the data owner for last open enrollment's usage and 429s by key: the real baseline for M1 and M2. |
 | Weeks 2–5 | **Shadow gateway:** architecture review, CISO sign-off and egress entry in parallel (`ecosystem.md`), then observe-only in production. |
-| Next peak | Read the shadow metrics. Member Services signs T_chat, and Claims signs its limit. Rerun `evaluate` with the signed values and real token shares. |
+| Next peak | Read the shadow metrics. **Show the member-chat numbers to member-service agents from the peak shift first** (R17): do they match what they lived through? Then Member Services signs T_chat, and Claims signs its limit. Rerun `evaluate` with the signed values and real token shares. |
 | Only if G2 says PROCEED on real data | Turn enforcement on. Rollback is turning it off again. |
 
 ## 6. The risks
@@ -110,8 +112,9 @@ Chat and claims shed / offered:
 
 | Item | Where |
 | --- | --- |
-| Code | `../solution/`. `uv run pytest` runs 82 checks. `uv run python -m fde_gateway.evaluate` reproduces the fixes table; `uv run python -m fde_gateway.observe` reproduces the shadow metrics. |
-| Requirements (R1–R16) and acceptance cases | `requirements.md`, `evals/golden.jsonl` |
+| Code | `../solution/`. `uv run pytest` runs every check, including snapshots of the saved results. `uv run python -m fde_gateway.evaluate` reproduces the fixes table; `uv run python -m fde_gateway.observe` reproduces the shadow metrics. |
+| Who each requirement and threshold comes from, and what each person still owes | `stakeholders.md` |
+| Requirements (R1–R17) and acceptance cases | `requirements.md`, `evals/golden.jsonl` |
 | Rules fixed before the run | `evals/PREREGISTRATION.md`, `evals/thresholds.json` |
 | Decisions, including the step 8 amendment | `decisions.md` |
 | Order of work | `../PROCESS.md` |
@@ -119,6 +122,8 @@ Chat and claims shed / offered:
 ---
 
 **The ask:**
-- **The platform engineering lead, week 1:** how many provider keys there are, and what provider reporting breaks out per key.
-- **The enterprise architect and CISO:** an architecture-review slot in week 2, for a gateway that observes only.
-- **The Member Services and Claims operations managers:** 30 minutes together after the next peak, to sign T_chat and the Claims limit against the shadow numbers.
+- **Platform engineering lead**, week 1: how many provider keys there are, and what provider reporting breaks out per key.
+- **Data owner for usage and 429 logs**, week 2: usage and 429s by key for last open enrollment, under a written purpose and retention limit.
+- **Enterprise architect / CTO delegate** and **CISO / privacy officer**: an architecture-review slot in week 2, for a gateway that observes only.
+- **Member-service agent**, after the next peak: 15 minutes with a few agents from the peak shift, to check the member-chat shadow numbers against what they lived through, before anything is signed.
+- **Member Services operations manager** and **Claims operations manager**: 30 minutes together after that, to sign T_chat and the Claims limit against the shadow numbers.
