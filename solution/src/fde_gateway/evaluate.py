@@ -22,6 +22,11 @@ def _rate(t: dict) -> float:
     return t["shed"] / t["offered"]
 
 
+def p99(samples: list[float]) -> float:
+    """The 99th percentile (M6), by the statistics module's default exclusive method."""
+    return statistics.quantiles(samples, n=100)[98]
+
+
 def evaluate_mix(mix: str, seeds: range, thresholds: dict[str, float]) -> dict:
     """All options, M1-M6 and M8 (M7, month-end showback, isn't simulated), and the gate verdicts for one mix (R12). M6 is the decision latency in R9."""
     results = {name: pooled(opt, seeds, mix) for name, opt in OPTIONS.items()}
@@ -38,10 +43,11 @@ def evaluate_mix(mix: str, seeds: range, thresholds: dict[str, float]) -> dict:
         spoof_critical += spoofed["spoof_critical"]
         spoof_attempts += spoofed["spoof_attempts"]
 
-    fails_option1 = chat["option1"]["shed"]
+    fails_today, fails_option1 = chat["today"]["shed"], chat["option1"]["shed"]
     metrics = {
         "m1_today": _rate(chat["today"]),
-        "m2_backoffice_share": (chat["today"]["shed"] - chat["chat_alone"]["shed"]) / chat["today"]["shed"],
+        # No chat failures today means M1 is 0 and G0 stops before it reads M2.
+        "m2_backoffice_share": (fails_today - chat["chat_alone"]["shed"]) / fails_today if fails_today else 0.0,
         "m1_option1": _rate(chat["option1"]),
         "candidates": {
             n: {"m3": (fails_option1 - chat[n]["shed"]) / fails_option1 if fails_option1 else 0.0,
@@ -49,7 +55,7 @@ def evaluate_mix(mix: str, seeds: range, thresholds: dict[str, float]) -> dict:
             for n in CANDIDATES
         },
         "m5_chat_alone": _rate(chat["chat_alone"]),
-        "m6_p99_ms": statistics.quantiles(timings, n=100)[98],
+        "m6_p99_ms": p99(timings),
         "m8_spoof_admits": spoof_critical,
         "m8_spoof_attempts": spoof_attempts,
     }
@@ -90,6 +96,11 @@ def results_json(evaluations: dict[str, dict], values: dict[str, float], statuse
                  "results": ev["results"]}
            for mix, ev in evaluations.items()},
     }
+
+
+def write_results(path: Path, evaluations: dict[str, dict], values: dict[str, float], statuses: dict[str, str]) -> None:
+    """Save ``results_json`` to ``path``. A NaN or infinity raises ValueError, and nothing is written."""
+    path.write_text(json.dumps(results_json(evaluations, values, statuses), indent=2, allow_nan=False))
 
 
 def _cell(t: dict | None) -> str:
@@ -133,7 +144,7 @@ def main() -> None:
         print(report(mix, ev, statuses) + "\n")
 
     if args.out:
-        args.out.write_text(json.dumps(results_json(evaluations, values, statuses), indent=2, allow_nan=False))
+        write_results(args.out, evaluations, values, statuses)
 
 
 if __name__ == "__main__":

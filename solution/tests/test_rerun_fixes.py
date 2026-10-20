@@ -14,6 +14,7 @@ from fde_gateway.observe import observe, report
 from fde_gateway.options import HELD_OUT_SEEDS, STARTER, shadow_replay
 from fde_gateway.shedder import LoadShedder, Request, ShedderConfig
 from fde_gateway.traffic import CALLERS, MIXES, open_enrollment_peak
+from test_audit import section
 
 IDENTITIES = {caller: workload for workload, caller in CALLERS.items()}
 EVALS = Path(__file__).parents[2] / "use_case" / "evals"
@@ -112,7 +113,7 @@ def test_refund_is_capped_at_capacity():
 @pytest.mark.parametrize("mix", list(MIXES))
 def test_published_observability_output_reproduces(mix):
     published = (EVALS / "results" / "2026-10-18_heldout_observability.md").read_text()
-    assert report(mix, observe(mix, HELD_OUT_SEEDS)) in published
+    assert report(mix, observe(mix, HELD_OUT_SEEDS)) == section(published, mix)
 
 
 def test_end_to_end_g2_proceed_sizes_quota_for_the_recommended_option():
