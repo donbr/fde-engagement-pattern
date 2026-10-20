@@ -30,7 +30,7 @@ Every gate can end the work, and each of those endings is a deliverable.
 
 An earlier solution-first spike (not included in this repo) is the comparison point; see [What changed from the first pass](#what-changed-from-the-first-pass).
 
-Step numbers (step 7, step 8, and so on) refer to rows in [`PROCESS.md`](./PROCESS.md). Steps 0–8 are the engagement; step 8 is its one amendment: after the first readout, a reviewer pointed out the gateway's visibility value, and the recommendation changed while the gate verdicts didn't. Steps 9 onward are publication and review of this repo.
+Step numbers (step 7, step 8, and so on) refer to rows in [`PROCESS.md`](./PROCESS.md). Steps 0–8 are the engagement; step 8 is its one amendment: after the first readout, a reviewer pointed out the gateway's visibility value, and the recommendation changed while the gate verdicts didn't.
 
 The client is **hypothetical** (a regional health insurer) and the traffic is **synthetic**. Thresholds are **proposed**, for owners to sign.
 

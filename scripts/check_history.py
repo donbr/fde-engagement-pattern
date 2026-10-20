@@ -9,7 +9,7 @@ Three checks, each printed PASS or FAIL:
      thresholds.json. ``status`` may change, because signing is how an owner
      turns ``proposed`` into ``signed``.
 
-Commits 0-9 were reconstructed after the fact (PROCESS.md, "Evidence of order"),
+Commits 0-8 were made after the engagement (PROCESS.md, "Evidence of order"),
 so for those steps check 1 shows the commit order, not when the work happened.
 Checks 2 and 3 are a lock from here on: any later edit to a case or a threshold
 value fails CI, and must come with a row in use_case/decisions.md.

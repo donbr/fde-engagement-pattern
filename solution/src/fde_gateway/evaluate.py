@@ -77,7 +77,7 @@ def recommendation(gates: dict[str, Verdict]) -> str | None:
 
     G2's option when it names one; option1 when G1 stops on it (the cheap fix meets
     the target); otherwise None. There is no default: a gate that never ran
-    recommends nothing (step 10).
+    recommends nothing.
     """
     if gates["G2"].option:
         return gates["G2"].option

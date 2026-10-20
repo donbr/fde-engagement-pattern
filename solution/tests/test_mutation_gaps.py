@@ -162,7 +162,7 @@ def test_estimate_at_capacity_is_a_floor_shed_not_too_large(estimate, reason):
     assert g.submit(CALLERS["claims_summary"], "c1", estimate).reason == reason
 
 
-# --- Gateway settlement (step 12 fixes that had no test) ---
+# --- Gateway settlement ---
 
 def test_settle_leaves_the_call_running_when_the_shedder_has_no_hold():
     # kills moving `del self.running[...]` above `shedder.release(...)` in Gateway.settle

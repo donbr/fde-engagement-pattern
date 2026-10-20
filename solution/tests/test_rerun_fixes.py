@@ -1,4 +1,4 @@
-"""Step 12: findings from the pre-publication re-run, plus the test gaps it rated highest."""
+"""Tier reserves, token_estimate validation, attribution by identity, threshold units, snapshots and formulas."""
 
 import copy
 import math
@@ -25,7 +25,7 @@ def shared_gateway(enforce: bool = True, clock=lambda: 0.0) -> Gateway:
     return Gateway({w: shedder for w in WORKLOADS}, IDENTITIES, enforce=enforce)
 
 
-# --- Important: a known caller can't hit a missing reserve (R7) ---
+# --- a known caller can't hit a missing reserve (R7) ---
 
 def test_gateway_rejects_a_shedder_without_a_reserve_for_the_workloads_tier():
     critical_only = LoadShedder(ShedderConfig(1000, 100, {"CRITICAL": 0.0}))
@@ -33,7 +33,7 @@ def test_gateway_rejects_a_shedder_without_a_reserve_for_the_workloads_tier():
         Gateway({w: critical_only for w in WORKLOADS}, IDENTITIES, enforce=False)
 
 
-# --- Important: token_estimate is validated before anything is recorded ---
+# --- token_estimate is validated before anything is recorded ---
 
 @pytest.mark.parametrize("bad, error", [
     (0, ValueError), (-1, ValueError), (float("nan"), TypeError), (10.5, TypeError), (True, TypeError), (None, TypeError),
@@ -55,7 +55,7 @@ def test_shedder_rejects_non_int_token_estimate():
     assert s.token_balance == 1000
 
 
-# --- Important: shadow_replay attributes provider failures by identity ---
+# --- shadow_replay attributes provider failures by identity ---
 
 def test_shadow_replay_attributes_by_caller_identity_not_ground_truth():
     # claims traffic arrives through the chat front end's identity, so it is attributed to member_chat
@@ -68,7 +68,7 @@ def test_shadow_replay_attributes_by_caller_identity_not_ground_truth():
     assert rep["provider"]["member_chat"]["offered"] == chat_and_claims
 
 
-# --- Important: thresholds in the wrong units or shape are rejected ---
+# --- thresholds in the wrong units or shape are rejected ---
 
 ENTRY = '"owner": "o", "status": "proposed", "reason": "r"'
 
@@ -90,7 +90,7 @@ def test_threshold_entry_must_be_an_object(tmp_path):
         load_thresholds(p)
 
 
-# --- Suggestions rated highest by the re-run ---
+# --- G2 option, refund cap, snapshots, end to end, formulas ---
 
 def test_g2_proceed_carries_the_option():
     t = {"t_chat": 0.05, "m2_min": 0.5, "m3_min": 0.5, "m4_max_points": 15, "m6_p99_ms_max": 1.0, "m8_max": 0}

@@ -41,7 +41,7 @@ The client is hypothetical (a regional health insurer, an illustrative example).
 
 **Order of recommendation:** 1 first. Then measure. Then 3 only if the gap is worth it, compared against 2. Then 4, sized by what remains. Each step's data decides whether the next one happens.
 
-**Also cheap, and missing from the ladder above** *(added in step 15; not simulated or evaluated)*: **cache the repeated prompt prefix** (system instructions, static policy text). It's a config change, done in days. How much limit it frees depends on the provider: on [Anthropic's API](https://platform.claude.com/docs/en/api/rate-limits#cache-aware-itpm), cache reads don't count toward the input-tokens-per-minute limit for most models, while a combined tokens-per-minute limit may count cached tokens too. The synthetic traffic has no prompt content, so this example can't estimate the effect. On a real engagement, measure the repeated-prefix share of input tokens and check the provider's rules; if both favour it, run it alongside option 1. The options, gates and verdicts above are unchanged.
+**Also cheap, and missing from the ladder above** *(added after the engagement; not simulated or evaluated)*: **cache the repeated prompt prefix** (system instructions, static policy text). It's a config change, done in days. How much limit it frees depends on the provider: on [Anthropic's API](https://platform.claude.com/docs/en/api/rate-limits#cache-aware-itpm), cache reads don't count toward the input-tokens-per-minute limit for most models, while a combined tokens-per-minute limit may count cached tokens too. The synthetic traffic has no prompt content, so this example can't estimate the effect. On a real engagement, measure the repeated-prefix share of input tokens and check the provider's rules; if both favour it, run it alongside option 1. The options, gates and verdicts above are unchanged.
 
 ### The gateway has two values, decided separately *(amended in step 8)*
 
@@ -165,7 +165,7 @@ This is the lesson to apply early: hear the people with inconvenient information
 | G0 | 2026-10-18 **SIM, waves** | M1, M2 | as above | M1 501/1209 = 41.4%; **M2 37%** | **NARROW: size quota** (option 1 needs ~1.9×) | — |
 | G3 | — | M1, M7, M8 | — | Not reachable in simulation | — | — |
 
-Every SIM row comes from `evals/results/2026-10-18_heldout.md`, regenerated from code in steps 9 and 10 with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`). M6 is wall-clock timing on a laptop and varies between runs (4–8 µs since step 5); the 4 µs above is what step 5 measured.
+Every SIM row comes from `evals/results/2026-10-18_heldout.md`, regenerated from code with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`). M6 is wall-clock timing on a laptop and varies between runs (4–8 µs since step 5); the 4 µs above is what step 5 measured.
 
 ### What the first results changed
 

@@ -1,7 +1,7 @@
 # Readout: which fix keeps member chat up at peak
 
 *To: everyone in `stakeholders.md`. From: the FDE lead. Stage: end of Design & Prototype, simulated.*
-*The client is hypothetical and the traffic synthetic (`data/DATASHEET.md`). The thresholds are **proposed and unsigned** (`evals/thresholds.json`). Every number comes from the held-out runs in `evals/results/`, regenerated from code in steps 9 and 10 with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`).*
+*The client is hypothetical and the traffic synthetic (`data/DATASHEET.md`). The thresholds are **proposed and unsigned** (`evals/thresholds.json`). Every number comes from the held-out runs in `evals/results/`, regenerated from code with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`).*
 *Amended in step 8 (`../PROCESS.md`): the first version judged the gateway only as an enforcer and missed its visibility value. The recommendation changed as a result; the gate verdicts did not.*
 
 ## 1. Headline

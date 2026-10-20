@@ -4,7 +4,7 @@ Requirements it implements (use_case/requirements.md at the repo root):
     R5  the tier comes from the caller's identity; a claimed tier is ignored and flagged.
     R6  decision records carry metadata only.
     R7  shadow mode never blocks a known caller; ``set_enforce`` is the kill switch.
-        Unknown callers are rejected in both modes (R5; decisions.md, step 10).
+        Unknown callers are rejected in both modes (R5; decisions.md).
     R8  counts by tier and reason.
     R10 showback on actual tokens for every call that ran, including shadow-allowed would-sheds.
     R15 per-workload metrics that don't exist today: calls, reasons, estimate accuracy.

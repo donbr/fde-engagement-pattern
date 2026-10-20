@@ -1,4 +1,4 @@
-"""Step 16: the saved evaluate report reproduces, so CI checks the published tables on every push."""
+"""The saved evaluate report reproduces, so CI checks the published tables on every push."""
 
 import re
 from pathlib import Path
