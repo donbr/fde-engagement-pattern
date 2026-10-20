@@ -30,7 +30,7 @@ Every gate can end the work, and each of those endings is a deliverable.
 
 An earlier solution-first spike (not included in this repo) is the comparison point; see [What changed from the first pass](#what-changed-from-the-first-pass).
 
-Step numbers (step 7, step 8, and so on) refer to rows in [`PROCESS.md`](./PROCESS.md). Steps 0–8 are the engagement; step 8 is its one amendment: after the first readout, a reviewer pointed out the gateway's visibility value, and the recommendation changed while the gate verdicts didn't. Steps 9 onward are publication and review of this repo.
+Step numbers (step 7, step 8, and so on) refer to rows in [`PROCESS.md`](./PROCESS.md). Steps 0–8 are the engagement; step 8 is its one amendment: after the first readout, a reviewer pointed out the gateway's visibility value, and the recommendation changed while the gate verdicts didn't.
 
 The client is **hypothetical** (a regional health insurer) and the traffic is **synthetic**. Thresholds are **proposed**, for owners to sign.
 
@@ -45,6 +45,7 @@ The client is **hypothetical** (a regional health insurer) and the traffic is **
 | **T_chat** | The example's target: the member-chat failure rate at peak that the business owner will accept. In general, the owner's target metric. |
 | **Proposed vs signed** | The FDE proposes thresholds; the named owner signs them. Every verdict shows which kind it used. |
 | **Shadow mode** | The control runs in the call path and records what it would have done, but blocks no known caller. The kill switch (`set_enforce(False)`) turns enforcement off and falls back to this mode, which is today's behaviour plus a record. |
+| **Hold and settle** | Like a credit-card pre-authorization hold: authorize against an upfront token estimate, call the model, and capture actuals. Unused tokens are refunded; overruns are charged. |
 | **Visibility vs enforcement** | Two values of the same component, judged separately. Visibility (metrics that didn't exist before) often justifies it before enforcement does. |
 | **Acceptance (golden) cases** | A handful of cases whose expected outputs are worked out by hand from the requirements, before code exists, and never edited to fit the code. |
 | **Who / What / Wow** | A one-line outcome statement: who benefits, what changes for them, and the result they'd notice. |
@@ -58,7 +59,7 @@ The gateway in the worked example is what vendors call an **AI gateway** (or **L
 | --- | --- | --- |
 | Lower tiers are shed first (`reserves`) | Load shedding by request criticality | [Google SRE book, "Handling Overload"](https://sre.google/sre-book/handling-overload/) |
 | A token budget enforced at the gateway | AI gateway token rate limiting | [Azure API Management `llm-token-limit`](https://learn.microsoft.com/en-us/azure/api-management/llm-token-limit-policy), [Kong AI Rate Limiting Advanced](https://developer.konghq.com/plugins/ai-rate-limiting-advanced/), [Envoy AI Gateway usage-based rate limiting](https://aigateway.envoyproxy.io/docs/capabilities/traffic/usage-based-ratelimiting) |
-| A hold on the estimate, settled on actual tokens (`release`) | Estimate, then reconcile; a limit can briefly overshoot | [Azure API Management `llm-token-limit`, "Considerations for token counts and estimation"](https://learn.microsoft.com/en-us/azure/api-management/llm-token-limit-policy#considerations-for-token-counts-and-estimation): concurrent requests can temporarily exceed the limit, because actual usage is known only after the response |
+| A hold on the estimate, settled on actual tokens (`release`) | Estimate, then reconcile (hold and settle, like a credit-card pre-authorization hold) | [Azure API Management `llm-token-limit`, "Considerations for token counts and estimation"](https://learn.microsoft.com/en-us/azure/api-management/llm-token-limit-policy#considerations-for-token-counts-and-estimation): concurrent requests can temporarily exceed the limit, because actual usage is known only after the response |
 | One bucket per process; a second replica needs shared counters | Distributed rate-limit counters | [Kong AI Rate Limiting Advanced](https://developer.konghq.com/plugins/ai-rate-limiting-advanced/): `local` counters diverge as nodes scale, `cluster` or `redis` share them. [`llm-token-limit`](https://learn.microsoft.com/en-us/azure/api-management/llm-token-limit-policy) counts per gateway and doesn't aggregate across regional gateways. |
 | A protected share of capacity per tier | Priority levels with protected shares | [Kubernetes API Priority and Fairness](https://kubernetes.io/docs/concepts/cluster-administration/flow-control/) |
 | Sheddable traffic for self-hosted model serving | Inference gateway with per-objective priority | [Gateway API Inference Extension](https://gateway-api-inference-extension.sigs.k8s.io/) ([CNCF deep dive](https://www.cncf.io/blog/2025/04/21/deep-dive-into-the-gateway-api-inference-extension/)) |
@@ -109,6 +110,15 @@ uv run python -m fde_gateway.observe         # prints shadow metrics (saved copy
 Lead with `use_case/cxo-story.md` §1 and §2, then the results in §8. **The line to repeat:**
 
 > "The cheapest fix gets most of the way. The gateway's first job is to show you numbers you don't have today: whose calls fail, who uses the peak, how far off the estimates are. Those numbers decide whether it should ever enforce anything, and I'll show you the answer either way."
+
+### Answer any CxO question in six moves
+
+1. **Their outcome first:** *"Member chats get turned away at peak. That's SLA misses and members choosing another plan."*
+2. **One plain sentence on cause:** *"Batch work and live chat share one pipe, and batch fills it."*
+3. **Options with trade-offs:** *"Buy more quota (fast, recurring cost), shift batch work off peak (zero software, immediate), or prioritize traffic via gateway (in-process library; sized after discovery)."*
+4. **Your recommendation:** *"Move batch work first (Option 1). In simulation that fixes most of it (18.3% → 5.8% shed), while a shadow gateway observes live numbers to prove if tier enforcement is ever needed."*
+5. **How we'll know:** *"First we make it visible in real time, on identifiers that can't be spoofed. Then a dry run. Then we decide together: one shared pipe with reserves, separate pipes, or both. Then we turn it on and compare."*
+6. **What I need from you:** *"A named owner for the tiering table, and sign-off on what counts as critical."*
 
 ## Reusing this pattern
 

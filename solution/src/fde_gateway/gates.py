@@ -53,11 +53,13 @@ def load_thresholds(path: Path) -> tuple[dict[str, float], dict[str, str]]:
     ``m8_max: NaN`` makes the spoofing stop rule unable to fire.
 
     Raises:
-        ValueError: A duplicate or unknown key, an entry that isn't an object, a
+        ValueError: A file that isn't a JSON object, a duplicate or unknown key, an entry that isn't an object, a
             value that isn't a finite number or is out of range for its units, or a
             status that isn't "proposed" or "signed".
     """
     raw = json.loads(Path(path).read_text(), object_pairs_hook=_no_duplicates)
+    if not isinstance(raw, dict):
+        raise ValueError(f"threshold file must be a JSON object keyed by threshold, got {type(raw).__name__}")
     for key, entry in raw.items():
         if key not in KNOWN:
             raise ValueError(f"unknown threshold {key!r}; expected some of {sorted(KNOWN)}")

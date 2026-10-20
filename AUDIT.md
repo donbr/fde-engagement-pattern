@@ -2,23 +2,23 @@
 
 The repo claims that the order of work is the evidence. Each claim below has a command or file that checks it. Commands run from the repo root and need Python 3.11+, [uv](https://docs.astral.sh/uv/) and a full clone (not `--depth 1`). What you **can't** verify here is listed at the end.
 
-From step 16 on, [CI](./.github/workflows/ci.yml) runs checks 1–4 on every push and pull request.
+[CI](./.github/workflows/ci.yml) runs checks 1–4 on every push and pull request.
 
 | # | Claim | Check | What you should see |
 | :---: | --- | --- | --- |
 | 1 | The code works, and the published results come from it | `cd solution && uv run pytest` | All pass. The `published` snapshot tests (`uv run pytest -k published`) regenerate `use_case/evals/results/` on the held-out seeds and compare them with the saved files. |
 | 2 | The evidence files were committed in step order: acceptance cases, thresholds, failing tests, code, held-out results | `python3 scripts/check_history.py` | `PASS  order of evidence files` |
-| 3 | The acceptance cases weren't edited to fit the code | Same script; then `git log --oneline -- use_case/evals/golden.jsonl` | `PASS  acceptance cases unchanged`. The log shows step 2, which added them, and step 12, which changed one `why` text and no input or expected output. |
+| 3 | The acceptance cases weren't edited to fit the code | Same script; then `git log --oneline -- use_case/evals/golden.jsonl` | `PASS  acceptance cases unchanged`. The log shows step 2, which added them, and one later commit that changed a `why` text and no input or expected output. |
 | 4 | No threshold value changed after it was registered, and none is signed yet | Same script; then `grep -c '"proposed"' use_case/evals/thresholds.json` | `PASS  threshold values unchanged`, and `6` (all six still proposed) |
-| 5 | The tests were written first, and failed | `git switch --detach "$(git log --format=%h --grep='^Step 4a' -1)"`, then `cd solution && uv run pytest`. Return with `cd .. && git switch -`. | Collection fails with `ModuleNotFoundError` (`fde_gateway.gates`, `fde_gateway.gateway`). The step 4b commit passes 35. |
-| 6 | Stopping is a real outcome, not just a word | `cd solution && uv run pytest -k stop` | Six tests where a gate returns STOP, including the golden case `gate_stops_when_cheap_fix_suffices` |
+| 5 | The tests were written first, and failed | `git worktree add ../step4a "$(git log --format=%h --grep='^Step 4a' -1)" && (cd ../step4a/solution && uv run pytest); git worktree remove --force ../step4a && git worktree prune`. A separate worktree leaves your checkout untouched. | Collection fails with `ModuleNotFoundError` (`fde_gateway.gates`, `fde_gateway.gateway`). The step 4b commit passes 35. |
+| 6 | Stopping is a real outcome, not just a word | `cd solution && uv run pytest -k stop` | Seven tests where a gate returns STOP, including the golden case `gate_stops_when_cheap_fix_suffices` |
 | 7 | The tier comes from identity, and the gateway reads no content (CISO, R5 and R6) | `cd solution && uv run pytest -k "spoof or metadata_only"` | Three tests pass. M8 in the results is `0 / 221` spoofed admits. |
 
 Checks 2–4 are also a lock going forward: an edit to a case's input or expected output, or to a threshold value, fails CI. Such a change needs a row in [`use_case/decisions.md`](./use_case/decisions.md) and a matching update to `scripts/check_history.py`. Signing a threshold changes only its `status`, so it passes.
 
 ## What you can't verify here
 
-- **When steps 0–9 happened.** Their git history was reconstructed after step 9 and rewritten in step 12 ([`PROCESS.md`, "Evidence of order"](./PROCESS.md#evidence-of-order)). Commit order is real; commit times are not the step times. The step times in `PROCESS.md` are self-reported, backed by file modification times listed there. Steps 10 onward are real commits.
+- **When steps 0–8 happened.** Their commits, and the step 9 publication commit, were made after the engagement, one per step, from the log ([`PROCESS.md`, "Evidence of order"](./PROCESS.md#evidence-of-order)). Commit order follows the log; commit times are not the step times. The step times in `PROCESS.md` are self-reported, backed by the file modification times listed there.
 - **That the thresholds were set blind.** They weren't fully: I had seen an earlier spike's results on other seeds when I proposed them. The held-out seeds and the `waves` mix were not run before step 5. Disclosed at the top of [`PROCESS.md`](./PROCESS.md).
 - **Anything about a real client.** The client is hypothetical, the traffic is synthetic ([`DATASHEET.md`](./use_case/data/DATASHEET.md) says what that can't validate), and the thresholds are proposed, not signed.
 - **M6 on your machine.** Decision latency is wall-clock, so it differs from the saved value. The snapshot tests leave it out.

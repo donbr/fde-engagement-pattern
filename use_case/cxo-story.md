@@ -1,6 +1,6 @@
 # The CxO story: sell the outcome, pre-register the proof, say the kill criteria out loud
 
-*fde-engagement-pattern · illustrative example · written **before** implementation*
+*fde-engagement-pattern · illustrative example · problem, hypotheses and gate rules written **before** implementation; §1 six-move pitch and §2 pre-authorization analogy updated as post-engagement communication assets*
 
 This replaces the story from an earlier solution-first spike (not included in this repo) with one built the FDE way:
 1. Start from the problem.
@@ -25,11 +25,22 @@ The client is hypothetical (a regional health insurer, an illustrative example).
 
 > During open enrollment, member-service agents lose their AI-assisted answers at the moment of highest member demand, because back-office work uses up the shared model capacity first, and nobody can say which department used it.
 
+### Answer any CxO question in six moves
+
+1. **Their outcome first:** *"Member chats get turned away at peak. That's SLA misses and members choosing another plan."*
+2. **One plain sentence on cause:** *"Batch work and live chat share one pipe, and batch fills it."*
+3. **Options with trade-offs:** *"Buy more quota (fast, recurring cost), shift batch work off peak (zero software, immediate), or prioritize traffic via gateway (in-process library; sized after discovery)."*
+4. **Your recommendation:** *"Move batch work first (Option 1). In simulation that fixes most of it (18.3% → 5.8% shed), while a shadow gateway observes live numbers to prove if tier enforcement is ever needed."*
+5. **How we'll know:** *"First we make it visible in real time, on identifiers that can't be spoofed. Then a dry run. Then we decide together: one shared pipe with reserves, separate pipes, or both. Then we turn it on and compare."*
+6. **What I need from you:** *"A named owner for the tiering table, and sign-off on what counts as critical."*
+
 ---
 
 ## 2. What we're selling, and what we're not
 
 **We're selling an outcome and a decision process, not a gateway.** The gateway is option 3 of 5. It earns its place only if the cheaper options leave a gap worth closing.
+
+The hold-and-settle mechanism operates like a **credit-card pre-authorization hold**: authorize against an upfront token estimate, run the model call, and capture actual usage on completion. Unused tokens are refunded; overruns are charged.
 
 | # | Option | Cost and time | What it fixes | What it can't fix |
 | :---: | --- | --- | --- | --- |
@@ -41,7 +52,7 @@ The client is hypothetical (a regional health insurer, an illustrative example).
 
 **Order of recommendation:** 1 first. Then measure. Then 3 only if the gap is worth it, compared against 2. Then 4, sized by what remains. Each step's data decides whether the next one happens.
 
-**Also cheap, and missing from the ladder above** *(added in step 15; not simulated or evaluated)*: **cache the repeated prompt prefix** (system instructions, static policy text). It's a config change, done in days. How much limit it frees depends on the provider: on [Anthropic's API](https://platform.claude.com/docs/en/api/rate-limits#cache-aware-itpm), cache reads don't count toward the input-tokens-per-minute limit for most models, while a combined tokens-per-minute limit may count cached tokens too. The synthetic traffic has no prompt content, so this example can't estimate the effect. On a real engagement, measure the repeated-prefix share of input tokens and check the provider's rules; if both favour it, run it alongside option 1. The options, gates and verdicts above are unchanged.
+**Also cheap, and missing from the ladder above** *(added after the engagement; not simulated or evaluated)*: **cache the repeated prompt prefix** (system instructions, static policy text). It's a config change, done in days. How much limit it frees depends on the provider: on [Anthropic's API](https://platform.claude.com/docs/en/api/rate-limits#cache-aware-itpm), cache reads don't count toward the input-tokens-per-minute limit for most models, while a combined tokens-per-minute limit may count cached tokens too. The synthetic traffic has no prompt content, so this example can't estimate the effect. On a real engagement, measure the repeated-prefix share of input tokens and check the provider's rules; if both favour it, run it alongside option 1. The options, gates and verdicts above are unchanged.
 
 ### The gateway has two values, decided separately *(amended in step 8)*
 
@@ -165,7 +176,7 @@ This is the lesson to apply early: hear the people with inconvenient information
 | G0 | 2026-10-18 **SIM, waves** | M1, M2 | as above | M1 501/1209 = 41.4%; **M2 37%** | **NARROW: size quota** (option 1 needs ~1.9×) | — |
 | G3 | — | M1, M7, M8 | — | Not reachable in simulation | — | — |
 
-Every SIM row comes from `evals/results/2026-10-18_heldout.md`, regenerated from code in steps 9 and 10 with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`). M6 is wall-clock timing on a laptop and varies between runs (4–8 µs since step 5); the 4 µs above is what step 5 measured.
+Every SIM row comes from `evals/results/2026-10-18_heldout.md`, regenerated from code with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`). M6 is wall-clock timing on a laptop and varies between runs (4–8 µs since step 5); the 4 µs above is what step 5 measured.
 
 ### What the first results changed
 

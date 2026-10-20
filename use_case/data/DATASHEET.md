@@ -1,13 +1,13 @@
 # Datasheet
 
-*Written in step 3 of `../../PROCESS.md`, before the generator was written or run. This file is committed; the data is not. Traffic is generated in memory from the spec below.*
+*Written in step 3 of `../../PROCESS.md`, before the generator was written or run. (Mermaid Gantt visualization added as post-engagement documentation). This file is committed; the data is not. Traffic is generated in memory from the spec below.*
 
 ## What this data is
 
 **Generated from:** the written description below. **No real records.**
 **Bucket:** the starter scenario's: 1,000 tokens, refilling at 100 tokens/s.
 **Window:** one 120-second open-enrollment morning peak per seed.
-**Held-out seeds:** 200–219, never run by `evaluate` before step 5. The step 4 tests did touch seeds 200–204 for invariant checks; see the correction in `../../PROCESS.md`. The invariant tests now use seeds 300+; only the snapshot tests run 200–219, to pin the published results. The first-pass spike used seeds 0–19 and 100–119.
+**Held-out seeds:** 200–219, never run by `evaluate` before step 5. The step 4 tests did touch seeds 200–204 for invariant checks; see the correction in `../../PROCESS.md`. The invariant tests now use seeds 300+; seeds 200–219 are run only to pin the saved results. The first-pass spike used seeds 0–19 and 100–119.
 
 **Description:** member chat and claims summaries arrive all morning. The nightly policy refresh has spilled over and floods the first minute. In the "waves" mix, member chats also surge for 10 seconds three times in the window, as members respond to an enrollment email.
 
@@ -19,6 +19,24 @@
 | | `claims_summary` | Poisson 0.10/s | uniform 300–600 | 0–120 s |
 | | `policy_refresh` | Poisson 1.00/s | uniform 400–800 | 0–60 s |
 | `waves` | everything in `baseline`, plus extra `member_chat` | Poisson 1.00/s | uniform 150–350 | 20–30, 60–70, 100–110 s |
+
+```mermaid
+gantt
+    title 120-Second Open Enrollment Peak Window
+    dateFormat HH:mm:ss
+    axisFormat %M:%S
+
+    section Baseline (Spill-over)
+    Policy Refresh Flood (1.0/s)    :crit, 00:00:00, 00:01:00
+    Claims Processing (0.1/s)       :active, 00:00:00, 00:02:00
+    Member Chat (0.25/s)            :00:00:00, 00:02:00
+
+    section Waves (Chat Bursts)
+    Wave 1 Surge (20-30s, 1.0/s)    :crit, 00:00:20, 00:00:30
+    Wave 2 Surge (60-70s, 1.0/s)    :crit, 00:01:00, 00:01:10
+    Wave 3 Surge (100-110s, 1.0/s)  :crit, 00:01:40, 00:01:50
+    Baseline Background Load        :active, 00:00:00, 00:02:00
+```
 
 **For every call:**
 - **Actual vs estimate:** actual tokens are uniform between 70% and 105% of the estimate, so some calls overrun.

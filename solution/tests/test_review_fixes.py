@@ -1,4 +1,4 @@
-"""Step 10: one test per pre-publication review finding (see PROCESS.md and use_case/decisions.md)."""
+"""Recommendations, NOT DECIDABLE handling, input guards, threshold validation and the saved-results snapshot (decisions.md)."""
 
 import json
 import math
@@ -23,7 +23,7 @@ def make_gateway(enforce: bool = True) -> Gateway:
     return Gateway({w: shedder for w in WORKLOADS}, IDENTITIES, enforce=enforce)
 
 
-# --- Critical 1: no recommendation for an option the gates never reached ---
+# --- no recommendation for an option the gates never reached ---
 
 def test_recommendation_is_none_when_g2_not_reached():
     gates = {"G0": Verdict("NARROW", "size quota"), "G1": Verdict("NOT REACHED", ""), "G2": Verdict("NOT REACHED", "")}
@@ -45,7 +45,7 @@ def test_recommendation_is_none_when_g2_narrows_without_an_option():
     assert recommendation(gates) is None
 
 
-# --- Critical 2: a missing t_chat is NOT DECIDABLE, not a crash ---
+# --- a missing t_chat is NOT DECIDABLE, not a crash ---
 
 def test_missing_t_chat_does_not_crash_evaluate():
     values, _ = load_thresholds(THRESHOLDS)
@@ -55,7 +55,7 @@ def test_missing_t_chat_does_not_crash_evaluate():
     assert ev["quota_scale"] == {} and "t_chat" in ev["quota_note"]
 
 
-# --- Important: the published numbers are pinned (catches e.g. dropping the x100 on M4) ---
+# --- the published numbers are pinned (catches e.g. dropping the x100 on M4) ---
 
 @pytest.fixture(scope="module")
 def published():
@@ -90,7 +90,7 @@ def test_results_json_keeps_threshold_statuses():
     assert set(out["thresholds"]) == set(values)
 
 
-# --- Important: request ids can't be reused while a hold is open ---
+# --- request ids can't be reused while a hold is open ---
 
 def test_gateway_rejects_a_request_id_that_is_still_running():
     g = make_gateway()
@@ -116,7 +116,7 @@ def test_a_settled_id_can_be_reused():
     assert g.submit("chat-frontend", "m1", 100).allowed
 
 
-# --- Important: settle validates before it changes anything ---
+# --- settle validates before it changes anything ---
 
 @pytest.mark.parametrize("bad, error", [(None, TypeError), ("80", TypeError), (True, TypeError), (-5, ValueError)])
 def test_settle_rejects_bad_token_actual_and_keeps_the_hold(bad, error):
@@ -138,7 +138,7 @@ def test_shedder_release_rejects_bad_token_actual_and_keeps_the_hold(bad, error)
     assert s.request_ledger == {"a": 100}
 
 
-# --- Important: the kill switch takes a real boolean ---
+# --- the kill switch takes a real boolean ---
 
 @pytest.mark.parametrize("bad", ["false", 0, 1, None])
 def test_set_enforce_rejects_non_bool(bad):
@@ -153,7 +153,7 @@ def test_gateway_constructor_rejects_non_bool_enforce():
         Gateway({w: LoadShedder(ShedderConfig(1000, 100, STARTER)) for w in WORKLOADS}, IDENTITIES, enforce="no")  # pyright: ignore[reportArgumentType]  (the wrong type is the point)
 
 
-# --- Important: the threshold file can't silently disable a rule ---
+# --- the threshold file can't silently disable a rule ---
 
 def _write(tmp_path, text: str) -> Path:
     p = tmp_path / "t.json"
@@ -181,7 +181,7 @@ def test_threshold_keys_must_not_repeat(tmp_path):
         load_thresholds(_write(tmp_path, text))
 
 
-# --- Important: ShedderConfig validates and is really frozen ---
+# --- ShedderConfig validates and is really frozen ---
 
 @pytest.mark.parametrize("kwargs", [
     {"token_capacity": 0, "token_refill_per_sec": 100, "reserves": STARTER},
@@ -207,7 +207,7 @@ def test_shedder_config_reserves_are_a_private_read_only_copy():
     assert STARTER["CRITICAL"] == 0.0
 
 
-# --- Important: every identity's workload has a shedder ---
+# --- every identity's workload has a shedder ---
 
 def test_gateway_rejects_identity_without_a_shedder():
     shedder = LoadShedder(ShedderConfig(1000, 100, STARTER))
@@ -215,7 +215,7 @@ def test_gateway_rejects_identity_without_a_shedder():
         Gateway({"member_chat": shedder}, IDENTITIES)
 
 
-# --- Suggestions: decided behaviour and gaps in coverage ---
+# --- decided behaviour and gaps in coverage ---
 
 def test_unknown_caller_is_rejected_in_shadow_mode_too():
     g = make_gateway(enforce=False)

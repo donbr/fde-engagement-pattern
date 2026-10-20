@@ -1,7 +1,7 @@
 # Readout: which fix keeps member chat up at peak
 
 *To: everyone in `stakeholders.md`. From: the FDE lead. Stage: end of Design & Prototype, simulated.*
-*The client is hypothetical and the traffic synthetic (`data/DATASHEET.md`). The thresholds are **proposed and unsigned** (`evals/thresholds.json`). Every number comes from the held-out runs in `evals/results/`, regenerated from code in steps 9 and 10 with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`).*
+*The client is hypothetical and the traffic synthetic (`data/DATASHEET.md`). The thresholds are **proposed and unsigned** (`evals/thresholds.json`). Every number comes from the held-out runs in `evals/results/`, regenerated from code with label and reporting changes only; every count and verdict is identical to the step 5 run (`../PROCESS.md`).*
 *Amended in step 8 (`../PROCESS.md`): the first version judged the gateway only as an enforcer and missed its visibility value. The recommendation changed as a result; the gate verdicts did not.*
 
 ## 1. Headline
@@ -21,7 +21,66 @@ The product is a **decision instrument** with two parts:
 
    Enforcement is a separate switch, flipped only if the evidence says so.
 
-**Worked example** (golden case `showback_charges_what_ran`, shadow mode). The refresh job sends a 700-token call. The policy would hold it back (it would leave 300, under its 400 floor), but in shadow mode it runs, and its **650 actual tokens are charged to Content Operations**. A member chat estimated at 300 uses 240 and is charged 240. Finance sees who used what. Member Services sees what protection would have done. Nobody was blocked.
+**Worked example** (golden case `showback_charges_what_ran`, shadow mode). The hold-and-settle mechanism acts like a **credit-card pre-authorization hold**: authorize on the upfront estimate, invoke the model, and capture actual usage on return. The refresh job sends a 700-token call. The policy would hold it back (it would leave 300, under its 400 floor), but in shadow mode it runs, and its **650 actual tokens are charged to Content Operations**. A member chat estimated at 300 uses 240 and is charged 240. Finance sees who used what. Member Services sees what protection would have done. Nobody was blocked.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Caller (Client App)
+    participant G as Gateway (In-Process Library)
+    participant S as LoadShedder
+    participant L as LLM Provider API
+
+    C->>G: submit(caller, id, token_estimate)
+    alt unknown caller identity
+        G-->>C: raise PermissionError (unauthenticated)
+    else invalid estimate <= 0 or non-int or reused id
+        G-->>C: raise ValueError / TypeError (before recording)
+    else valid request
+        Note over G: resolve workload & tier from caller identity<br/>(client tags are untrusted and ignored)
+        G->>S: admit(Request(id, tier, token_estimate))
+        alt passes reserve floor (enforce or shadow)
+            Note over S: HOLD: balance -= estimate<br/>request_ledger[id] = estimate
+            S-->>G: True (held)
+            G-->>C: Decision(allowed=True, reason="admitted")
+            C->>L: call model directly (prompt)
+            alt call succeeds
+                L-->>C: response with token_actual
+                C->>G: settle(id, token_actual)
+                G->>S: release(id, token_actual)
+                Note over S: SETTLE: pop hold, balance += estimate - actual
+                Note over G: charge token_actual to caller department
+                G-->>C: return None
+            else call fails or aborts
+                C->>G: cancel(id)
+                G->>S: release(id, 0)
+                Note over S: CANCEL: pop hold, refund estimate, zero cost charged
+                G-->>C: return None
+            end
+        else below reserve floor & shadow mode (enforce=False)
+            Note over S: shed += 1 (would-shed recorded, no hold placed)
+            S-->>G: False (not held)
+            Note over G: shadow allowed: track running call with held=False
+            G-->>C: Decision(allowed=True, reason="floor")
+            C->>L: call model directly (prompt)
+            alt call succeeds
+                L-->>C: response with token_actual
+                C->>G: settle(id, token_actual)
+                Note over G: SETTLE: skip shedder release (no hold)<br/>charge token_actual to caller department
+                G-->>C: return None
+            else call fails or aborts
+                C->>G: cancel(id)
+                Note over G: CANCEL: drop running call, zero cost charged
+                G-->>C: return None
+            end
+        else below reserve floor & enforce mode (enforce=True)
+            Note over S: shed += 1
+            S-->>G: False (shed)
+            G-->>C: Decision(allowed=False, reason="floor")
+            Note over C: shed immediately, model not called
+        end
+    end
+```
 
 ## 3. The numbers
 
