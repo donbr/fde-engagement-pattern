@@ -28,8 +28,6 @@ flowchart LR
 
 Every gate can end the work, and each of those endings is a deliverable.
 
-![Enterprise LLM Gateway: Priority Load Shedding and Cost Control](./assets/Priority_Load_Shedding_Architecture.png)
-
 An earlier solution-first spike (not included in this repo) is the comparison point; see [What changed from the first pass](#what-changed-from-the-first-pass).
 
 Step numbers (step 7, step 8, and so on) refer to rows in [`PROCESS.md`](./PROCESS.md). Steps 0–8 are the engagement; step 8 is its one amendment: after the first readout, a reviewer pointed out the gateway's visibility value, and the recommendation changed while the gate verdicts didn't.
@@ -117,8 +115,8 @@ Lead with `use_case/cxo-story.md` §1 and §2, then the results in §8. **The li
 
 1. **Their outcome first:** *"Member chats get turned away at peak. That's SLA misses and members choosing another plan."*
 2. **One plain sentence on cause:** *"Batch work and live chat share one pipe, and batch fills it."*
-3. **Options with trade-offs:** *"Buy more quota (fast, recurring cost), or prioritize traffic (one small service; sized after discovery)."*
-4. **Your recommendation:** *"Prioritize first. In simulation that fixes most of it, and what's left shows whether we need more quota."*
+3. **Options with trade-offs:** *"Buy more quota (fast, recurring cost), shift batch work off peak (zero software, immediate), or prioritize traffic via gateway (in-process library; sized after discovery)."*
+4. **Your recommendation:** *"Move batch work first (Option 1). In simulation that fixes most of it (18.3% → 5.8% shed), while a shadow gateway observes live numbers to prove if tier enforcement is ever needed."*
 5. **How we'll know:** *"First we make it visible in real time, on identifiers that can't be spoofed. Then a dry run. Then we decide together: one shared pipe with reserves, separate pipes, or both. Then we turn it on and compare."*
 6. **What I need from you:** *"A named owner for the tiering table, and sign-off on what counts as critical."*
 

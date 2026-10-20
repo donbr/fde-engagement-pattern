@@ -10,8 +10,6 @@ During open enrollment, member-service agents lose their AI assistant at peak be
 
 ## 2. What it does
 
-![Enterprise LLM Gateway: Priority Load Shedding and Cost Control](../assets/Priority_Load_Shedding_Architecture.png)
-
 The product is a **decision instrument** with two parts:
 
 1. **An options replay.** The same peak traffic runs through each fix in cost order. Each fix is scored against thresholds agreed in advance and gets a verdict at each gate.
@@ -23,34 +21,49 @@ The product is a **decision instrument** with two parts:
 
    Enforcement is a separate switch, flipped only if the evidence says so.
 
-**Worked example** (golden case `showback_charges_what_ran`, shadow mode). The hold-and-settle mechanism acts like a **gas pump pre-authorization**: authorize on the upfront estimate, invoke the model, and capture actual usage on return. The refresh job sends a 700-token call. The policy would hold it back (it would leave 300, under its 400 floor), but in shadow mode it runs, and its **650 actual tokens are charged to Content Operations**. A member chat estimated at 300 uses 240 and is charged 240. Finance sees who used what. Member Services sees what protection would have done. Nobody was blocked.
+**Worked example** (golden case `showback_charges_what_ran`, shadow mode). The hold-and-settle mechanism acts like a **credit-card pre-authorization hold**: authorize on the upfront estimate, invoke the model, and capture actual usage on return. The refresh job sends a 700-token call. The policy would hold it back (it would leave 300, under its 400 floor), but in shadow mode it runs, and its **650 actual tokens are charged to Content Operations**. A member chat estimated at 300 uses 240 and is charged 240. Finance sees who used what. Member Services sees what protection would have done. Nobody was blocked.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant C as Caller
-    participant G as Gateway
+    participant C as Caller (Client App)
+    participant G as Gateway (In-Process Library)
     participant S as LoadShedder
-    participant L as LLM API
+    participant L as LLM Provider API
+
     C->>G: submit(caller, id, token_estimate)
-    Note over G: tier from caller identity<br/>estimate from tokenizer
-    G->>S: admit(Request(id, tier, token_estimate))
-    alt unknown tier or estimate <= 0
-        S-->>G: raise ValueError (nothing recorded)
-    else valid
-        Note over S: _refill(), then reserve floor rule
-        alt passes reserve floor
-            Note over S: HOLD: balance -= estimate<br/>request_ledger[id] = estimate
-            S-->>G: True (admitted)
-            G->>L: call model
-            L-->>G: response with token_actual
-            G->>S: release(id, token_actual) in finally
-            Note over S: SETTLE: pop hold, _refill()<br/>balance += estimate - actual<br/>(overrun can go negative)
-            G-->>C: return response
-        else below reserve floor
-            Note over S: shed += 1 (in shadow mode: allow & mark would-shed)
-            S-->>G: False
-            G-->>C: return shed (or shadow allow)
+    alt unknown caller identity
+        G-->>C: raise PermissionError (unauthenticated)
+    else valid caller
+        Note over G: resolve workload & tier from caller identity<br/>(client tags are untrusted and ignored)
+        G->>S: admit(Request(id, tier, token_estimate))
+        alt estimate <= 0 or invalid type
+            S-->>G: raise ValueError / TypeError
+            G-->>C: raise error (not recorded)
+        else reserve floor check
+            alt passes floor (or shadow mode active)
+                Note over S: HOLD: balance -= estimate<br/>request_ledger[id] = estimate
+                S-->>G: True (admitted)
+                G-->>C: Decision(allowed=True, tier, trace_id)
+                C->>L: call model directly (prompt)
+                alt call succeeds
+                    L-->>C: response with token_actual
+                    C->>G: settle(id, token_actual)
+                    G->>S: release(id, token_actual)
+                    Note over S: SETTLE: pop hold, balance += estimate - actual<br/>(charge actual to caller department)
+                    G-->>C: settled
+                else call fails or aborts
+                    C->>G: cancel(id)
+                    G->>S: release(id, 0)
+                    Note over S: CANCEL: pop hold, refund estimate, zero cost charged
+                    G-->>C: cancelled
+                end
+            else below reserve floor (enforce mode)
+                Note over S: shed += 1
+                S-->>G: False (shed)
+                G-->>C: Decision(allowed=False, reason="below reserve floor")
+                Note over C: shed immediately; model not called
+            end
         end
     end
 ```

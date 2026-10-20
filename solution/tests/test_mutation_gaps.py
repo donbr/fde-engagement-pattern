@@ -1,4 +1,4 @@
-"""Boundary, edge-case and sensor tests. Each one names the code mutation it catches.
+"""Boundary, edge-case and sensor tests targeting mutation gaps and regression boundaries.
 
 Boundary cases cite use_case/evals/PREREGISTRATION.md.
 """
@@ -98,7 +98,7 @@ def test_window_with_no_chat_failures_today_stops_at_g0_instead_of_crashing():
     # seed 109 has no member-chat sheds today, so M2's denominator is zero
     values, _ = load_thresholds(EVALS / "thresholds.json")
     ev = evaluate_mix("baseline", range(109, 110), values)
-    assert ev["metrics"]["m1_today"] == 0.0 and ev["metrics"]["m2_backoffice_share"] == 0.0
+    assert ev["metrics"]["m1_today"] == 0.0 and ev["metrics"]["m2_backoffice_share"] is None
     assert ev["gates"]["G0"].verdict == "STOP"
 
 
@@ -120,12 +120,18 @@ def test_m8_sensor_fires_when_a_gateway_trusts_the_claim(monkeypatch):
 
 def test_backwards_clock_adds_nothing():
     # kills shedder.py `max(0.0, now - last)` -> `now - last`
+    # and kills `last_refill_time = current_time` resetting backwards
     now = [10.0]
     s = shedder_at(now)
     s.admit(Request("a", "CRITICAL", 500))
     now[0] = 5.0
     s.admit(Request("b", "CRITICAL", 1))
     assert s.token_balance == 499
+    # Clock moves forward to 6.0 (still behind original 10.0).
+    # Must NOT credit tokens for 5.0 -> 6.0 interval that already elapsed before 10.0.
+    now[0] = 6.0
+    s.admit(Request("c", "CRITICAL", 1))
+    assert s.token_balance == 498
 
 
 def test_partial_refill_then_cap():

@@ -1,6 +1,6 @@
 # Evals
 
-*Written in steps 2–3 of `../../PROCESS.md`, before any code.*
+*Written in steps 2–3 of `../../PROCESS.md`, before any code. Sections on stakeholder governance mapping and the request state machine added as post-engagement verification audits.*
 
 ## Stakeholder Governance: Which Tests Clear Which Role
 
@@ -8,29 +8,33 @@ The evaluation suite and acceptance cases are not generic benchmarks; they are *
 
 ```text
                                   ┌───► 1. CISO / Privacy (Identity & Anti-Spoofing: R5, M8)
-                                  ├───► 2. FinOps / CFO (Showback & Overruns: R10, M5)
-[ Acceptance Tests & Gate Suite ] ┼───► 3. SRE / Platform (Shadow Mode & Kill Switch: R7, M6)
-                                  ├───► 4. Member Services Ops (Chat SLA: R1, T_chat)
-                                  ├───► 5. Claims Ops (Trade-off Cost: M4, G2)
-                                  └───► 6. Sponsor (CIO/COO) (Fiduciary Stop Rule: R12, G1)
+                                  ├───► 2. CDO / CAIO (Model Safety & Batch Isolation: R6, Option 1)
+                                  ├───► 3. FinOps / CFO (Showback & Overruns: R10, M5)
+[ Acceptance Tests & Gate Suite ] ┼───► 4. SRE / Platform (Shadow Mode & Kill Switch: R7, M6)
+                                  ├───► 5. Member Services Ops (Chat SLA: R1, T_chat)
+                                  ├───► 6. Claims Ops (Trade-off Cost: M4, G2)
+                                  └───► 7. Sponsor (CIO/COO) (Fiduciary Stop Rule: R12, G1)
 ```
 
 1. **CISO / Privacy Officer (Veto):**
    - *Concern:* Blast radius, payload inspection, tier spoofing.
-   - *Clearing evidence:* `tier_comes_from_identity` (Case 2, R5); metadata-only decision records (R6); spoofing sensor test in `test_mutation_gaps.py` ($M_8 = 0$).
-2. **FinOps Lead / CFO Delegate (Veto via procurement):**
+   - *Clearing evidence:* `tier_comes_from_identity` (Case 2, R5); metadata-only decision records (R6); `test_requirements.py::test_spoofing_replay_never_decides_a_claims_call_at_critical` ($M_8 = 0$ in replay); `test_mutation_gaps.py::test_g2_spoofing_sensor_fires` (positive control proving the sensor trips when a gateway trusts claims).
+2. **CDO / CAIO (Architectural Alignment):**
+   - *Concern:* Model payload confidentiality, prompt security, and isolating batch operations from customer-facing agents.
+   - *Clearing evidence:* Zero-content inspection guarantee (R6); clean separation of batch lanes (Option 1); caller authentication via infrastructure identity (R5).
+3. **FinOps Lead / CFO Delegate (Veto via procurement):**
    - *Concern:* True financial showback, paying for unrun calls or estimation padding.
-   - *Clearing evidence:* `showback_charges_what_ran` (Case 4, R10); overrun balance tests (holds settle on actuals; shed calls cost $0); quota scaling ($M_5$).
-3. **SRE / Platform Engineering Lead (Readiness):**
+   - *Clearing evidence:* `showback_charges_what_ran` (Case 4, R10); overrun balance tests (holds settle on actuals; shed calls cost zero); quota scaling ($M_5$).
+4. **SRE / Platform Engineering Lead (Readiness):**
    - *Concern:* Outage blast radius, added latency, kill-switch reliability.
-   - *Clearing evidence:* `shadow_mode_and_kill_switch` (Case 3, R7); latency p99 $\le 1$ ms test ($M_6$); clock-drift resilience; `KeyError` idempotency guards.
-4. **Member Services Operations Manager (Problem Owner):**
+   - *Clearing evidence:* `shadow_mode_and_kill_switch` (Case 3, R7); latency p99 gate verification against `m6_p99_ms_max` ($M_6$); clock-drift resilience (`max(last_refill, now)`); `KeyError` idempotency guards.
+5. **Member Services Operations Manager (Problem Owner):**
    - *Concern:* Live member chat availability during peak enrollment.
    - *Clearing evidence:* `member_chat_survives_refresh_flood` (Case 1, R1); gate boundary tests on $M_1 \le T_{\text{chat}}$ and $M_3 \ge 50\%$.
-5. **Claims Operations Manager (Cross-Department Partner):**
+6. **Claims Operations Manager (Cross-Department Partner):**
    - *Concern:* The sacrifice of claims summaries to protect member chat.
    - *Clearing evidence:* Gate 2 boundary tests ($M_4 \le 15$ pts); if the trade-off exceeds limits, G2 returns **NARROW**, keeping the decision in Claims' hands.
-6. **Sponsor (CIO or COO) (Go / No-Go):**
+7. **Sponsor (CIO or COO) (Go / No-Go):**
    - *Concern:* Funding unnecessary software when an operational fix suffices.
    - *Clearing evidence:* `gate_stops_when_cheap_fix_suffices` (Case 5, R12); Gate 1 returns **STOP** when Option 1 meets $T_{\text{chat}}$, halting further build spend.
 
@@ -69,15 +73,20 @@ The steps in each golden gateway case exercise the request transitions and idemp
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> Invalid: submit, bad priority or estimate <= 0 -> ValueError, not counted
-    [*] --> Shed: submit -> False (too large, or below the floor), shed += 1
-    [*] --> Held: submit -> True, balance -= estimate, hold in ledger
-    Held --> Settled: settle(id, actual), refund or overrun
-    Shed --> Shed: settle -> KeyError
-    Settled --> Settled: settle again -> KeyError
+    [*] --> Unauthenticated: submit, unknown caller -> PermissionError
+    [*] --> Invalid: submit, estimate <= 0 or non-int -> ValueError/TypeError
+    [*] --> Shed: submit (enforce), below floor -> False, shed += 1
+    [*] --> Held: submit, admitted (or shadow would-shed) -> True, hold in ledger
+    Held --> Settled: settle(id, actual), refund or overrun charged
+    Held --> Cancelled: cancel(id), hold popped, zero cost charged
+    Shed --> DeadEnd: settle -> KeyError
+    Settled --> Settled: settle again -> KeyError (idempotent guard)
+    Cancelled --> Cancelled: settle -> KeyError
+    Unauthenticated --> [*]
     Invalid --> [*]
     Shed --> [*]
     Settled --> [*]
+    Cancelled --> [*]
 ```
 
 **The gate case** gives `thresholds` and `metrics`, and expects a verdict for each gate.

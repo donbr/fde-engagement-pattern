@@ -157,7 +157,7 @@ class LoadShedder:
         current_time = self.clock()
         elapsed_sec = max(0.0, current_time - self.last_refill_time)  # backwards clock adds nothing
         self.token_balance = min(self.config.token_capacity, self.token_balance + elapsed_sec * self.config.token_refill_per_sec)
-        self.last_refill_time = current_time  # reset even if the clock went backwards
+        self.last_refill_time = max(self.last_refill_time, current_time)
 
     def admit(self, request: Request) -> bool:
         """Decide now whether ``request`` may run; on admit, place a hold for its estimate.

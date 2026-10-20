@@ -1,6 +1,6 @@
 # Decision log
 
-Logged during the build. The **Step** column ties each row to `../PROCESS.md`; *Later* rows were made after the engagement and change no result. The client is hypothetical. Results come from synthetic held-out seeds 200–219 (`evals/results/2026-10-18_heldout.md`).
+Logged during the build. The **Step** column ties each row to `../PROCESS.md`; *Later* rows were made after the engagement and change no count, metric or verdict. The client is hypothetical. Results come from synthetic held-out seeds 200–219 (`evals/results/2026-10-18_heldout.md`).
 
 > A decision without a rejected alternative is not a decision, it is a default.
 

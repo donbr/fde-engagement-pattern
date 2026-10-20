@@ -8,8 +8,8 @@
 > 1. **Charter & Requirements** were defined before acceptance tests (Steps 0–1).
 > 2. **Golden Acceptance Tests & Gate Thresholds** were frozen before any implementation (Steps 2–3).
 > 3. **TDD suite failed red** before gateway code existed (Step 4a $\to$ 4b).
-> 4. **Held-out traces were measured once** and preserved unedited (Step 5).
-> 5. **Filesystem timestamps and git commits** anchor this sequence in immutable history ([§ Evidence of order](#evidence-of-order)).
+> 4. **Held-out counts and verdicts** have remained unchanged since step 5.
+> 5. **Filesystem timestamps and git commits** anchor this sequence in verifiable history ([§ Evidence of order](#evidence-of-order)).
 
 The order this work was done in, timestamped when each step finished. The point of the pattern is that definition comes before build, so the order is the evidence.
 

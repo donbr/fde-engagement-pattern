@@ -47,7 +47,7 @@ def evaluate_mix(mix: str, seeds: range, thresholds: dict[str, float]) -> dict:
     metrics = {
         "m1_today": _rate(chat["today"]),
         # No chat failures today means M1 is 0 and G0 stops before it reads M2.
-        "m2_backoffice_share": (fails_today - chat["chat_alone"]["shed"]) / fails_today if fails_today else 0.0,
+        "m2_backoffice_share": (fails_today - chat["chat_alone"]["shed"]) / fails_today if fails_today else None,
         "m1_option1": _rate(chat["option1"]),
         "candidates": {
             n: {"m3": (fails_option1 - chat[n]["shed"]) / fails_option1 if fails_option1 else 0.0,
@@ -113,9 +113,10 @@ def report(mix: str, ev: dict, statuses: dict[str, str]) -> str:
         r = ev["results"][name]
         lines.append(f"| `{name}`: {opt.description} | {_cell(r.get('member_chat'))} | {_cell(r.get('claims_summary'))} |")
     m = ev["metrics"]
+    m2_val = f"{m['m2_backoffice_share']:.0%}" if m["m2_backoffice_share"] is not None else "n/a"
     lines += ["", "| Metric | Value |", "|---|---|",
               f"| M1 today / option 1 | {m['m1_today']:.1%} / {m['m1_option1']:.1%} |",
-              f"| M2 back-office share of today's chat failures | {m['m2_backoffice_share']:.0%} |"]
+              f"| M2 back-office share of today's chat failures | {m2_val} |"]
     for n, c in m["candidates"].items():
         lines.append(f"| M3 / M4 `{n}` | {c['m3']:.0%} of option-1 failures removed / {c['m4_points']:+.1f} pts claims sheds |")
     q = ", ".join(f"`{n}` {s if s is not None else '> 2.0'}x" for n, s in ev["quota_scale"].items()) or ev["quota_note"]

@@ -5,11 +5,11 @@
 > Borrowed from clinical trial methodology, this pre-registration protocol freezes the evaluation metrics, candidate options, and gate decision rules **before** running held-out traffic or writing production code.
 >
 > * **The Core Question:** Does software earn its place over zero-cost operational fixes?
-> * **The Decision Ladder ($G_0 \to G_3$):** Evaluated strictly in order. $G_0$ tests if the bottleneck is real; $G_1$ halts the gateway program if the zero-software fix (Option 1) solves the SLA; $G_2$ audits cross-stakeholder trade-offs (Member chat vs. Claims vs. Infosec vs. FinOps); $G_3$ requires live enforcement.
+> * **The Decision Ladder ($G_0 \to G_3$):** Evaluated strictly in order. $G_0$ tests if the bottleneck is real; $G_1$ halts the gateway program if the zero-software fix (Option 1) meets the proposed target ($t_{\text{chat}}$); $G_2$ audits cross-stakeholder trade-offs in first-match sequence (Infosec anti-spoofing $\to$ Option 2 $\to$ SRE latency $\to$ Options 3a/3b $\to$ Claims trade-off $\to$ STOP); $G_3$ requires live enforcement.
 > * **Unbiased Reporting Pledge:** As committed in [§ What I commit to reporting](#what-i-commit-to-reporting-regardless-of-outcome), all options, sensitivity edges, and divergent verdicts are reported even if they render the gateway redundant.
 > * **Stakeholder Mappings & Rationale:** For stakeholder-by-stakeholder veto criteria and evidence sources, see [`evals/README.md`](README.md). For business hypotheses and cost baselines, see [`cxo-story.md`](../cxo-story.md).
 
-*Written in step 3 of `../../PROCESS.md`, before any code and before any held-out run. It expands `../cxo-story.md` §3–§5 into exact definitions. The thresholds are in `thresholds.json`.*
+*Written in step 3 of `../../PROCESS.md`, before any code and before any held-out run. (Flowchart and protocol preamble added as post-engagement documentation). It expands `../cxo-story.md` §3–§5 into exact definitions. The thresholds are in `thresholds.json`.*
 
 ## Options, as configured for the replay
 
@@ -50,14 +50,22 @@ flowchart TD
     G0 -->|M2 >= m2_min| G1{G1: Is cheap fix enough?}
 
     G1 -->|M1 option1 <= t_chat| S1[STOP: Ship Option 1 Batch Lane. No Gateway!]
-    G1 -->|M1 option1 > t_chat| G2{G2: Does Gateway earn its place?}
+    G1 -->|M1 option1 > t_chat| G2_1{1. Infosec: M8 > m8_max?}
 
-    G2 -->|M8 > m8_max| S2a[STOP: Tier spoofable]
-    G2 -->|Option 2 passes| N2a[NARROW: Option 2 separate limits]
-    G2 -->|M6 p99 > m6_p99_ms_max| N2b[NARROW: Fix latency or run on existing proxy]
-    G2 -->|M3 >= m3_min and M4 <= m4_max_points| P2[PROCEED: Deploy Gateway Option 3a/3b]
-    G2 -->|M3 >= m3_min but M4 > m4_max_points| N2c[NARROW: Claims Owner decides trade-off]
-    G2 -->|M3 < m3_min| S2b[STOP: Benefit too small]
+    G2_1 -->|Yes| S2a[STOP: Tier spoofable]
+    G2_1 -->|No| G2_2{2. Option 2 passes?}
+
+    G2_2 -->|Yes| N2a[NARROW: Option 2 separate limits]
+    G2_2 -->|No| G2_3{3. SRE: M6 p99 > max?}
+
+    G2_3 -->|Yes| N2b[NARROW: Fix latency or run on proxy]
+    G2_3 -->|No| G2_4{4. Option 3a / 3b passes?}
+
+    G2_4 -->|Yes| P2[PROCEED: Deploy Gateway Option 3a/3b]
+    G2_4 -->|No| G2_5{5. Real benefit M3 >= min?}
+
+    G2_5 -->|Yes| N2c[NARROW: Claims Owner decides trade-off]
+    G2_5 -->|No| S2b[STOP: Benefit too small]
 ```
 
 | Gate | Rule |

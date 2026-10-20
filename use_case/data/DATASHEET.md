@@ -23,19 +23,19 @@
 ```mermaid
 gantt
     title 120-Second Open Enrollment Peak Window
-    dateFormat X
-    axisFormat %s s
+    dateFormat HH:mm:ss
+    axisFormat %M:%S
 
     section Baseline (Spill-over)
-    Policy Refresh Flood (1.0/s)    :crit, 0, 60
-    Claims Processing (0.1/s)       :active, 0, 120
-    Member Chat (0.25/s)            :0, 120
+    Policy Refresh Flood (1.0/s)    :crit, 00:00:00, 00:01:00
+    Claims Processing (0.1/s)       :active, 00:00:00, 00:02:00
+    Member Chat (0.25/s)            :00:00:00, 00:02:00
 
     section Waves (Chat Bursts)
-    Wave 1 Surge (1.0/s)            :crit, 20, 30
-    Wave 2 Surge (1.0/s)            :crit, 60, 70
-    Wave 3 Surge (1.0/s)            :crit, 100, 110
-    Baseline Background Load        :active, 0, 120
+    Wave 1 Surge (20-30s, 1.0/s)    :crit, 00:00:20, 00:00:30
+    Wave 2 Surge (60-70s, 1.0/s)    :crit, 00:01:00, 00:01:10
+    Wave 3 Surge (100-110s, 1.0/s)  :crit, 00:01:40, 00:01:50
+    Baseline Background Load        :active, 00:00:00, 00:02:00
 ```
 
 **For every call:**
