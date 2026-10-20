@@ -42,7 +42,7 @@ sequenceDiagram
         alt passes reserve floor (enforce or shadow)
             Note over S: HOLD: balance -= estimate<br/>request_ledger[id] = estimate
             S-->>G: True (held)
-            G-->>C: Decision(allowed=True, tier, trace_id)
+            G-->>C: Decision(allowed=True, reason="admitted")
             C->>L: call model directly (prompt)
             alt call succeeds
                 L-->>C: response with token_actual
@@ -50,28 +50,28 @@ sequenceDiagram
                 G->>S: release(id, token_actual)
                 Note over S: SETTLE: pop hold, balance += estimate - actual
                 Note over G: charge token_actual to caller department
-                G-->>C: settled
+                G-->>C: return None
             else call fails or aborts
                 C->>G: cancel(id)
                 G->>S: release(id, 0)
                 Note over S: CANCEL: pop hold, refund estimate, zero cost charged
-                G-->>C: cancelled
+                G-->>C: return None
             end
         else below reserve floor & shadow mode (enforce=False)
             Note over S: shed += 1 (would-shed recorded, no hold placed)
             S-->>G: False (not held)
             Note over G: shadow allowed: track running call with held=False
-            G-->>C: Decision(allowed=True, tier, trace_id)
+            G-->>C: Decision(allowed=True, reason="floor")
             C->>L: call model directly (prompt)
             alt call succeeds
                 L-->>C: response with token_actual
                 C->>G: settle(id, token_actual)
                 Note over G: SETTLE: skip shedder release (no hold)<br/>charge token_actual to caller department
-                G-->>C: settled
+                G-->>C: return None
             else call fails or aborts
                 C->>G: cancel(id)
                 Note over G: CANCEL: drop running call, zero cost charged
-                G-->>C: cancelled
+                G-->>C: return None
             end
         else below reserve floor & enforce mode (enforce=True)
             Note over S: shed += 1

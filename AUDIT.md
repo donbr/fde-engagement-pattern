@@ -18,7 +18,7 @@ Checks 2–4 are also a lock going forward: an edit to a case's input or expecte
 
 ## What you can't verify here
 
-- **When steps 0–8 happened.** Their commits were made after the engagement, one per step, from the log ([`PROCESS.md`, "Evidence of order"](./PROCESS.md#evidence-of-order)). Commit order follows the log; commit times are not the step times. The step times in `PROCESS.md` are self-reported, backed by the file modification times listed there.
+- **When steps 0–9 happened.** Their commits were made after the engagement, one per step, from the log ([`PROCESS.md`, "Evidence of order"](./PROCESS.md#evidence-of-order)). Commit order follows the log; commit times are not the step times. The step times in `PROCESS.md` are self-reported, backed by the file modification times listed there.
 - **That the thresholds were set blind.** They weren't fully: I had seen an earlier spike's results on other seeds when I proposed them. The held-out seeds and the `waves` mix were not run before step 5. Disclosed at the top of [`PROCESS.md`](./PROCESS.md).
 - **Anything about a real client.** The client is hypothetical, the traffic is synthetic ([`DATASHEET.md`](./use_case/data/DATASHEET.md) says what that can't validate), and the thresholds are proposed, not signed.
 - **M6 on your machine.** Decision latency is wall-clock, so it differs from the saved value. The snapshot tests leave it out.
