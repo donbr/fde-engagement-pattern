@@ -1,6 +1,6 @@
 # Datasheet
 
-*Written in step 3 of `../../PROCESS.md`, before the generator was written or run. This file is committed; the data is not. Traffic is generated in memory from the spec below.*
+*Written in step 3 of `../../PROCESS.md`, before the generator was written or run. (Mermaid Gantt visualization added as post-engagement documentation). This file is committed; the data is not. Traffic is generated in memory from the spec below.*
 
 ## What this data is
 

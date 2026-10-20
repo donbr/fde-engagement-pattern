@@ -34,36 +34,50 @@ sequenceDiagram
     C->>G: submit(caller, id, token_estimate)
     alt unknown caller identity
         G-->>C: raise PermissionError (unauthenticated)
-    else valid caller
+    else invalid estimate <= 0 or non-int or reused id
+        G-->>C: raise ValueError / TypeError (before recording)
+    else valid request
         Note over G: resolve workload & tier from caller identity<br/>(client tags are untrusted and ignored)
         G->>S: admit(Request(id, tier, token_estimate))
-        alt estimate <= 0 or invalid type
-            S-->>G: raise ValueError / TypeError
-            G-->>C: raise error (not recorded)
-        else reserve floor check
-            alt passes floor (or shadow mode active)
-                Note over S: HOLD: balance -= estimate<br/>request_ledger[id] = estimate
-                S-->>G: True (admitted)
-                G-->>C: Decision(allowed=True, tier, trace_id)
-                C->>L: call model directly (prompt)
-                alt call succeeds
-                    L-->>C: response with token_actual
-                    C->>G: settle(id, token_actual)
-                    G->>S: release(id, token_actual)
-                    Note over S: SETTLE: pop hold, balance += estimate - actual<br/>(charge actual to caller department)
-                    G-->>C: settled
-                else call fails or aborts
-                    C->>G: cancel(id)
-                    G->>S: release(id, 0)
-                    Note over S: CANCEL: pop hold, refund estimate, zero cost charged
-                    G-->>C: cancelled
-                end
-            else below reserve floor (enforce mode)
-                Note over S: shed += 1
-                S-->>G: False (shed)
-                G-->>C: Decision(allowed=False, reason="below reserve floor")
-                Note over C: shed immediately; model not called
+        alt passes reserve floor (enforce or shadow)
+            Note over S: HOLD: balance -= estimate<br/>request_ledger[id] = estimate
+            S-->>G: True (held)
+            G-->>C: Decision(allowed=True, tier, trace_id)
+            C->>L: call model directly (prompt)
+            alt call succeeds
+                L-->>C: response with token_actual
+                C->>G: settle(id, token_actual)
+                G->>S: release(id, token_actual)
+                Note over S: SETTLE: pop hold, balance += estimate - actual
+                Note over G: charge token_actual to caller department
+                G-->>C: settled
+            else call fails or aborts
+                C->>G: cancel(id)
+                G->>S: release(id, 0)
+                Note over S: CANCEL: pop hold, refund estimate, zero cost charged
+                G-->>C: cancelled
             end
+        else below reserve floor & shadow mode (enforce=False)
+            Note over S: shed += 1 (would-shed recorded, no hold placed)
+            S-->>G: False (not held)
+            Note over G: shadow allowed: track running call with held=False
+            G-->>C: Decision(allowed=True, tier, trace_id)
+            C->>L: call model directly (prompt)
+            alt call succeeds
+                L-->>C: response with token_actual
+                C->>G: settle(id, token_actual)
+                Note over G: SETTLE: skip shedder release (no hold)<br/>charge token_actual to caller department
+                G-->>C: settled
+            else call fails or aborts
+                C->>G: cancel(id)
+                Note over G: CANCEL: drop running call, zero cost charged
+                G-->>C: cancelled
+            end
+        else below reserve floor & enforce mode (enforce=True)
+            Note over S: shed += 1
+            S-->>G: False (shed)
+            G-->>C: Decision(allowed=False, reason="floor")
+            Note over C: shed immediately, model not called
         end
     end
 ```

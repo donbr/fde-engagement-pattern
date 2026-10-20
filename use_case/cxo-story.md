@@ -1,6 +1,6 @@
 # The CxO story: sell the outcome, pre-register the proof, say the kill criteria out loud
 
-*fde-engagement-pattern · illustrative example · written **before** implementation*
+*fde-engagement-pattern · illustrative example · problem, hypotheses and gate rules written **before** implementation; §1 six-move pitch and §2 pre-authorization analogy updated as post-engagement communication assets*
 
 This replaces the story from an earlier solution-first spike (not included in this repo) with one built the FDE way:
 1. Start from the problem.
