@@ -1,5 +1,14 @@
 # Pre-registration: how the options are judged
 
+> [!IMPORTANT]
+> **What is this document?**
+> Borrowed from clinical trial methodology, this pre-registration protocol freezes the evaluation metrics, candidate options, and gate decision rules **before** running held-out traffic or writing production code.
+>
+> * **The Core Question:** Does software earn its place over zero-cost operational fixes?
+> * **The Decision Ladder ($G_0 \to G_3$):** Evaluated strictly in order. $G_0$ tests if the bottleneck is real; $G_1$ halts the gateway program if the zero-software fix (Option 1) solves the SLA; $G_2$ audits cross-stakeholder trade-offs (Member chat vs. Claims vs. Infosec vs. FinOps); $G_3$ requires live enforcement.
+> * **Unbiased Reporting Pledge:** As committed in [§ What I commit to reporting](#what-i-commit-to-reporting-regardless-of-outcome), all options, sensitivity edges, and divergent verdicts are reported even if they render the gateway redundant.
+> * **Stakeholder Mappings & Rationale:** For stakeholder-by-stakeholder veto criteria and evidence sources, see [`evals/README.md`](README.md). For business hypotheses and cost baselines, see [`cxo-story.md`](../cxo-story.md).
+
 *Written in step 3 of `../../PROCESS.md`, before any code and before any held-out run. It expands `../cxo-story.md` §3–§5 into exact definitions. The thresholds are in `thresholds.json`.*
 
 ## Options, as configured for the replay
