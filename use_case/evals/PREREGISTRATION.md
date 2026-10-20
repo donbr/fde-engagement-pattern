@@ -33,6 +33,24 @@ All rates are pooled over the 20 held-out seeds: total count ÷ total count. The
 
 Gates are evaluated in order. A gate is evaluated only if the previous one said PROCEED; otherwise it reports NOT REACHED. A threshold the rule needs that's missing gives NOT DECIDABLE.
 
+```mermaid
+flowchart TD
+    Start([Held-out Replay Results]) --> G0{G0: Is problem real?}
+    G0 -->|M1 <= t_chat| S0[STOP: Chat already meets target]
+    G0 -->|M2 < m2_min| N0[NARROW: Chat causes its own bursts -> Size Quota]
+    G0 -->|M2 >= m2_min| G1{G1: Is cheap fix enough?}
+
+    G1 -->|M1 option1 <= t_chat| S1[STOP: Ship Option 1 Batch Lane. No Gateway!]
+    G1 -->|M1 option1 > t_chat| G2{G2: Does Gateway earn its place?}
+
+    G2 -->|M8 > m8_max| S2a[STOP: Tier spoofable]
+    G2 -->|Option 2 passes| N2a[NARROW: Option 2 separate limits]
+    G2 -->|M6 p99 > m6_p99_ms_max| N2b[NARROW: Fix latency or run on existing proxy]
+    G2 -->|M3 >= m3_min and M4 <= m4_max_points| P2[PROCEED: Deploy Gateway Option 3a/3b]
+    G2 -->|M3 >= m3_min but M4 > m4_max_points| N2c[NARROW: Claims Owner decides trade-off]
+    G2 -->|M3 < m3_min| S2b[STOP: Benefit too small]
+```
+
 | Gate | Rule |
 | --- | --- |
 | **G0** | STOP if `M1(today) ≤ t_chat`. Otherwise PROCEED if `M2 ≥ m2_min`. Otherwise NARROW: go to quota sizing. |

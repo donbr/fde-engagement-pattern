@@ -30,6 +30,24 @@ Each step's expected result is one of:
 
 `showback` is checked at the end.
 
+### Request state machine
+
+The steps in each golden gateway case exercise the request transitions and idempotency guards:
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Invalid: submit, bad priority or estimate <= 0 -> ValueError, not counted
+    [*] --> Shed: submit -> False (too large, or below the floor), shed += 1
+    [*] --> Held: submit -> True, balance -= estimate, hold in ledger
+    Held --> Settled: settle(id, actual), refund or overrun
+    Shed --> Shed: settle -> KeyError
+    Settled --> Settled: settle again -> KeyError
+    Invalid --> [*]
+    Shed --> [*]
+    Settled --> [*]
+```
+
 **The gate case** gives `thresholds` and `metrics`, and expects a verdict for each gate.
 
 Both mixes run against the same workload table: `member_chat` → Member Services, CRITICAL; `claims_summary` → Claims, STANDARD; `policy_refresh` → Content Operations, DEFERRABLE.

@@ -25,6 +25,36 @@ The product is a **decision instrument** with two parts:
 
 **Worked example** (golden case `showback_charges_what_ran`, shadow mode). The hold-and-settle mechanism acts like a **gas pump pre-authorization**: authorize on the upfront estimate, invoke the model, and capture actual usage on return. The refresh job sends a 700-token call. The policy would hold it back (it would leave 300, under its 400 floor), but in shadow mode it runs, and its **650 actual tokens are charged to Content Operations**. A member chat estimated at 300 uses 240 and is charged 240. Finance sees who used what. Member Services sees what protection would have done. Nobody was blocked.
 
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Caller
+    participant G as Gateway
+    participant S as LoadShedder
+    participant L as LLM API
+    C->>G: submit(caller, id, token_estimate)
+    Note over G: tier from caller identity<br/>estimate from tokenizer
+    G->>S: admit(Request(id, tier, token_estimate))
+    alt unknown tier or estimate <= 0
+        S-->>G: raise ValueError (nothing recorded)
+    else valid
+        Note over S: _refill(), then reserve floor rule
+        alt passes reserve floor
+            Note over S: HOLD: balance -= estimate<br/>request_ledger[id] = estimate
+            S-->>G: True (admitted)
+            G->>L: call model
+            L-->>G: response with token_actual
+            G->>S: release(id, token_actual) in finally
+            Note over S: SETTLE: pop hold, _refill()<br/>balance += estimate - actual<br/>(overrun can go negative)
+            G-->>C: return response
+        else below reserve floor
+            Note over S: shed += 1 (in shadow mode: allow & mark would-shed)
+            S-->>G: False
+            G-->>C: return shed (or shadow allow)
+        end
+    end
+```
+
 ## 3. The numbers
 
 ### What shadow mode shows that today's data can't

@@ -20,6 +20,24 @@
 | | `policy_refresh` | Poisson 1.00/s | uniform 400–800 | 0–60 s |
 | `waves` | everything in `baseline`, plus extra `member_chat` | Poisson 1.00/s | uniform 150–350 | 20–30, 60–70, 100–110 s |
 
+```mermaid
+gantt
+    title 120-Second Open Enrollment Peak Window
+    dateFormat X
+    axisFormat %s s
+
+    section Baseline (Spill-over)
+    Policy Refresh Flood (1.0/s)    :crit, 0, 60
+    Claims Processing (0.1/s)       :active, 0, 120
+    Member Chat (0.25/s)            :0, 120
+
+    section Waves (Chat Bursts)
+    Wave 1 Surge (1.0/s)            :crit, 20, 30
+    Wave 2 Surge (1.0/s)            :crit, 60, 70
+    Wave 3 Surge (1.0/s)            :crit, 100, 110
+    Baseline Background Load        :active, 0, 120
+```
+
 **For every call:**
 - **Actual vs estimate:** actual tokens are uniform between 70% and 105% of the estimate, so some calls overrun.
 - **Latency:** admit to settle takes a fixed 2 s.
