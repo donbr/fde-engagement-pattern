@@ -10,6 +10,8 @@ During open enrollment, member-service agents lose their AI assistant at peak be
 
 ## 2. What it does
 
+![Enterprise LLM Gateway: Priority Load Shedding and Cost Control](../assets/Priority_Load_Shedding_Architecture.png)
+
 The product is a **decision instrument** with two parts:
 
 1. **An options replay.** The same peak traffic runs through each fix in cost order. Each fix is scored against thresholds agreed in advance and gets a verdict at each gate.
@@ -21,7 +23,7 @@ The product is a **decision instrument** with two parts:
 
    Enforcement is a separate switch, flipped only if the evidence says so.
 
-**Worked example** (golden case `showback_charges_what_ran`, shadow mode). The refresh job sends a 700-token call. The policy would hold it back (it would leave 300, under its 400 floor), but in shadow mode it runs, and its **650 actual tokens are charged to Content Operations**. A member chat estimated at 300 uses 240 and is charged 240. Finance sees who used what. Member Services sees what protection would have done. Nobody was blocked.
+**Worked example** (golden case `showback_charges_what_ran`, shadow mode). The hold-and-settle mechanism acts like a **gas pump pre-authorization**: authorize on the upfront estimate, invoke the model, and capture actual usage on return. The refresh job sends a 700-token call. The policy would hold it back (it would leave 300, under its 400 floor), but in shadow mode it runs, and its **650 actual tokens are charged to Content Operations**. A member chat estimated at 300 uses 240 and is charged 240. Finance sees who used what. Member Services sees what protection would have done. Nobody was blocked.
 
 ## 3. The numbers
 

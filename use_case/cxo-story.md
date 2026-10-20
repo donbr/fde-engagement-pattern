@@ -25,11 +25,24 @@ The client is hypothetical (a regional health insurer, an illustrative example).
 
 > During open enrollment, member-service agents lose their AI-assisted answers at the moment of highest member demand, because back-office work uses up the shared model capacity first, and nobody can say which department used it.
 
+### Answer any CxO question in six moves
+
+1. **Their outcome first:** *"Member chats get turned away at peak. That's SLA misses and members choosing another plan."*
+2. **One plain sentence on cause:** *"Batch work and live chat share one pipe, and batch fills it."*
+3. **Options with trade-offs:** *"Buy more quota (fast, recurring cost), or prioritize traffic (one small service; sized after discovery)."*
+4. **Your recommendation:** *"Prioritize first. In simulation that fixes most of it, and what's left shows whether we need more quota."*
+5. **How we'll know:** *"First we make it visible in real time, on identifiers that can't be spoofed. Then a dry run. Then we decide together: one shared pipe with reserves, separate pipes, or both. Then we turn it on and compare."*
+6. **What I need from you:** *"A named owner for the tiering table, and sign-off on what counts as critical."*
+
 ---
 
 ## 2. What we're selling, and what we're not
 
 **We're selling an outcome and a decision process, not a gateway.** The gateway is option 3 of 5. It earns its place only if the cheaper options leave a gap worth closing.
+
+![Enterprise LLM Gateway: Priority Load Shedding and Cost Control](../assets/Priority_Load_Shedding_Architecture.png)
+
+The hold-and-settle mechanism operates like a **gas pump pre-authorization**: authorize against an upfront token estimate, run the model call, and capture actual usage on completion. Unused tokens are refunded; overruns are charged.
 
 | # | Option | Cost and time | What it fixes | What it can't fix |
 | :---: | --- | --- | --- | --- |
